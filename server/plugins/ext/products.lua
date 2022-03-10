@@ -63,8 +63,9 @@ end)
 function scope.addHomeProduct(data)
     table.insert(ENV.products, {
         name = data.name,
+        category = data.category,
         consume = { data.credit, 1 },
-        image = data.image or 'https://images.adsttc.com/media/images/5f90/e509/63c0/1779/0100/010e/newsletter/3.jpg?1603331288',
+        image = data.image or 'https://i.imgur.com/SMxEwXT.png',
         form = {
             {
                 label = _('select.home'),
@@ -127,8 +128,9 @@ end)
 function scope.addVehicleProduct(data)
     table.insert(ENV.products, {
         name = data.name,
+        category = data.category,
         consume = { data.credit, 1 },
-        image = data.image or '',
+        image = data.image or 'https://i.imgur.com/samafbT.png',
         form = {
             {
                 label = _('select.vehicle'),

@@ -115,6 +115,7 @@ RegisterCommand('store', function(source, args)
     for i,v in ipairs(ENV.products) do
         clone[i] = {
             name = v.name,
+            category = v.category,
             image = v.image,
             form = v.form,
             credits = credits[v.consume[1]] or 0,

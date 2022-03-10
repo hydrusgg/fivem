@@ -10,8 +10,11 @@ LANG = {
         ['contact.support'] = 'Contact Support',
         ['credits.insufficient'] = 'Insufficient credits',
         ['redeem'] = 'Redeem',
+        ['confirm'] = 'Confirm',
         ['redeem.one'] = 'Redeem for :amount credit',
         ['redeem.many'] = 'Redeem for :amount credits',
+        ['redeemed'] = 'Redeemed!',
+        ['categories'] = 'CATEGORIES',
         ['select.option'] = 'Select an option',
         ['select.home'] = 'Select a home',
         ['select.vehicle'] = 'Select a vehicle',
@@ -26,14 +29,19 @@ LANG = {
         ['connection.outage'] = 'Five consecutives errors ocorrured, rtc outage?\nTrying again in 60 seconds...',
         ['extension.not_found'] = 'Fail to load extension :name -> File not found',
         ['extension.error'] = 'Fail to load extension :name -> :error',
+
+        ['chat.template'] = '{0} just reedemed {1}',
     },
     ['pt'] = {
         ['error'] = 'Um erro ocorreu: :error',
         ['contact.support'] = 'Entre em contato com o suporte',
         ['credits.insufficient'] = 'Créditos insuficientes',
         ['redeem'] = 'Resgatar',
+        ['confirm'] = 'Confirmar',
         ['redeem.one'] = 'Resgatar por :amount crédito',
         ['redeem.many'] = 'Resgatar por :amount créditos',
+        ['redeemed'] = 'Você resgatou',
+        ['categories'] = 'CATEGORIAS',
         ['select.option'] = 'Selecione uma opção',
         ['select.home'] = 'Selecione uma residência',
         ['select.vehicle'] = 'Selecione um veículo',
@@ -48,6 +56,8 @@ LANG = {
         ['connection.outage'] = 'Cinco erros consecutivos, rtc outage?\nTentando novamente em 60 segundos...',
         ['extension.not_found'] = 'Falha ao carregar a extensão :name -> Arquivo não encontrado',
         ['extension.error'] = 'Falha ao carregar a extensão :name -> :error',
+
+        ['chat.template'] = '{0} comprou {1}',
     }
 }
 

@@ -17,7 +17,7 @@ function vRP.__index(self, name) -- Lua magic methods
         self.__pointer = id
 
         self.__callbacks[id] = p
-        TriggerEvent('vRP:proxy', name, {...}, script_name, id)
+        emit('vRP:proxy', name, {...}, script_name, id)
 
         return table.unpack(Citizen.Await(p))
     end
@@ -138,6 +138,44 @@ function Commands.changephone(user_id, phone)
     SQL('UPDATE vrp_user_identities SET phone=? WHERE user_id=?', { phone, user_id })
 end
 
+Commands['system-notify'] = function(data)
+    local payload = json.decode(Base64:decode(data))
+
+    local user_id = payload.user_id
+    local source = vRP.getUserSource(user_id)
+    if not source then
+        -- The player is offline, try again later...
+        Scheduler.new(user_id, 'system-notify', data)
+        Scheduler.save()
+    else
+        local status,order = Hydrus('GET', '/orders/'..payload.order_id)
+
+        if status ~= 200 then
+            return 'Order not found'
+        end
+
+        local packagesNames = table.concat(table.pluck(order.packages, 'name'), ', ')
+
+        local identity = vRP.getUserIdentity(user_id)
+        local name = identity.name or identity.nome or identity.firstname
+
+        emitNet('chat:addMessage', -1, {
+            template = string.format([[<div style="%s">%s</div>]], 
+                table.concat(ENV.chat_styles, ';'), _('chat.template')
+            ),
+            args = { name, packagesNames }
+        })
+        CreateThread(function()
+            for item in each(order.packages) do
+                remote.popup(source, item.name, item.image and item.image.url or 'http://platform.hydrus.gg/assets/image_unavailable.jpg')
+                Wait(3000)
+                remote.popup(source)
+                Wait(1000)
+            end
+        end)
+        return '__delete__'
+    end
+end
 ------------------------------------------------------------------------
 -- SCHEDULER
 ------------------------------------------------------------------------

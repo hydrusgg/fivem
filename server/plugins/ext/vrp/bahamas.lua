@@ -1,3 +1,6 @@
+vRP.getUserSource = vRP.userSource
+vRP.getUserIdentity = vRP.userIdentity
+
 local function update_datatable(user_id, cb) -- Wrapper to update datatable
     local dt = json.decode(vRP.userData(user_id, 'Datatable'))
     if dt then 

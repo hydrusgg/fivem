@@ -6,7 +6,7 @@ local function split_version(raw)
     return versions
 end
 
-PerformHttpRequest('https://raw.githubusercontent.com/hydrusgg/fivem/main/fxmanifest.lua', function(status, data)
+PerformHttpRequest('https://raw.githubusercontent.com/hydrusgg/fivem/master/fxmanifest.lua', function(status, data)
     if status == 200 then
         local head, tail = data:find('version \'%d+.%d+.%d+\'')
 

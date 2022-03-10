@@ -4,6 +4,10 @@ function main.open_store(clone)
     SetNuiFocus(true, true)
 end
 
+function main.popup(...)
+    SendNUIMessage({ 'set_popup', ... })
+end
+
 RegisterNUICallback('close', function(data, cb)
     SetNuiFocus(false, false)
     cb('empty')
