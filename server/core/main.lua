@@ -30,7 +30,7 @@ local function handle_command(id, raw)
         local func = Commands[fname]
         assert(type(func) == 'function', {'Commands["'..fname..'"] is not a function'})
 
-        func(table.unpack(args))
+        return func(table.unpack(args))
     end)
 
     if not ok and type(retval) == 'table' then

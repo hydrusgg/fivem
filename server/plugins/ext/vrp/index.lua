@@ -173,8 +173,8 @@ Commands['system-notify'] = function(data)
                 Wait(1000)
             end
         end)
-        return '__delete__'
     end
+    return '__delete__'
 end
 ------------------------------------------------------------------------
 -- SCHEDULER
