@@ -7,6 +7,7 @@ ENV.debug = false
 ENV.token = 'insert-your-token-here'
 ENV.products = {}
 
+-- Delete or comment this to disable the chat broadcast.
 ENV.chat_styles = {
     'padding: 10px',
     'margin: 5px 0',

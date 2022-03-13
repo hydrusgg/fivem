@@ -3,59 +3,16 @@ Hydrus = API('https://api.hydrus.gg/plugin/v1', {
 })
 Store = {}
 
-local safety_lock = {}
-safety_lock.running = false
-
-local function handle_command(id, raw)
-    if safety_lock[id] then
-        return printf('safety_lock catch %d', id)
-    end
-
-    repeat Wait(0)
-    until not safety_lock.running
-    safety_lock.running = true
-
-    safety_lock[id] = true
-
-    local ok, retval = pcall(function()
-        local args = raw:split(' ')
-        assert(#args > 0, {'Empty command'})
-
-        -- Automatically parse every argument to number if possible
-        for index, raw in ipairs(args) do
-            args[index] = tonumber(raw) or raw
-        end
-
-        local fname = table.remove(args, 1)
-        local func = Commands[fname]
-        assert(type(func) == 'function', {'Commands["'..fname..'"] is not a function'})
-
-        return func(table.unpack(args))
-    end)
-
-    if not ok and type(retval) == 'table' then
-        retval = retval[1]
-    end
-
-    while true do
-        local status = Hydrus('PATCH', 'commands/'..id, {
-            status = ok and 'done' or 'failed',
-            message = retval or 'OK'
-        })
-        if status ~= 200 then
-            printf('Failed to UPDATE the command %d, the script will try again in 10 seconds', id)
-            Wait(10e3)
-        else
-            break 
-        end
-    end
-    
-    safety_lock[id] = nil
-    safety_lock.running = false
-end
-
 CreateThread(function()
     local ws, connected, seq = nil, false, 0
+
+    local function push(job)
+        if Queue:exists('id', job.id) then
+            printf('Command %d already in queue', job.id)
+        else
+            Queue:push(job)
+        end
+    end
 
     function listener(event, payload)
         debug('Received event %s with %s', event, json.encode(payload))
@@ -82,10 +39,10 @@ CreateThread(function()
             connected = false
             ws.reconnect()
         elseif event == 'EXECUTE_COMMAND' then
-            handle_command(payload.id, payload.command)
+            push(payload)
         elseif event == 'EXECUTE_COMMANDS' then
             for i, item in ipairs(payload) do
-                handle_command(item.id, item.command)
+                push(item)
             end
         end
     end

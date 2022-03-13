@@ -151,20 +151,22 @@ Commands['system-notify'] = function(data)
         local status,order = Hydrus('GET', '/orders/'..payload.order_id)
 
         if status ~= 200 then
+            debug('Failed to fetch order: %d', status)
             return 'Order not found'
         end
 
-        local packagesNames = table.concat(table.pluck(order.packages, 'name'), ', ')
+        if ENV.chat_styles then
+            local identity = vRP.getUserIdentity(user_id)
+            local name = identity.name or identity.nome or identity.firstname
 
-        local identity = vRP.getUserIdentity(user_id)
-        local name = identity.name or identity.nome or identity.firstname
+            emitNet('chat:addMessage', -1, {
+                template = string.format([[<div style="%s">%s</div>]], 
+                    table.concat(ENV.chat_styles, ';'), _('chat.template')
+                ),
+                args = { name, table.concat(table.pluck(order.packages, 'name'), ', ') }
+            })
+        end
 
-        emitNet('chat:addMessage', -1, {
-            template = string.format([[<div style="%s">%s</div>]], 
-                table.concat(ENV.chat_styles, ';'), _('chat.template')
-            ),
-            args = { name, packagesNames }
-        })
         CreateThread(function()
             for item in each(order.packages) do
                 remote.popup(source, item.name, item.image and item.image.url or 'http://platform.hydrus.gg/assets/image_unavailable.jpg')
