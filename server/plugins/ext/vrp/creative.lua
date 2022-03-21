@@ -7,11 +7,11 @@ local function update_datatable(user_id, cb) -- Wrapper to update datatable
 end
 
 function Commands.group(user_id, group)
-  SQL('REPLACE INTO vrp_permissions (user_id, permiss) VALUES (?, ?)', { user_id, group })
+    SQL('REPLACE INTO vrp_permissions (user_id, permiss) VALUES (?, ?)', { user_id, group })
 end
 
 function Commands.ungroup(user_id, group)
-  SQL('DELETE FROM vrp_permissions WHERE user_id=? AND permiss=?', { user_id, group })
+    SQL('DELETE FROM vrp_permissions WHERE user_id=? AND permiss=?', { user_id, group })
 end
 Commands.delgroup = Commands.ungroup
 
@@ -52,33 +52,37 @@ function Commands.addvehicle(user_id, vehicle)
 end
 
 function Commands.delvehicle(user_id, vehicle)
-  SQL('DELETE FROM vrp_vehicles WHERE user_id=? AND vehicle=?', { user_id, vehicle })
+    SQL('DELETE FROM vrp_vehicles WHERE user_id=? AND vehicle=?', { user_id, vehicle })
 end
 
 function Commands.addhouse(user_id, name)
-  local old = SQL('SELECT * FROM vrp_homes WHERE owner=1 AND home=?', { name })[1]
+    local old = SQL('SELECT * FROM vrp_homes WHERE owner=1 AND home=?', { name })[1]
   
-  if old then
-      if string.equals(user_id, old.user_id) then 
-          return _('already.owned.self')
-      end
-      error(_('already.owned.someone'))
-  end
+    if old then
+        if string.equals(user_id, old.user_id) then 
+            return _('already.owned.self')
+        end
+        error(_('already.owned.someone'))
+    end
 
-  SQL.insert('vrp_homes', {
-      user_id = user_id,
-      home = name,
-      owner = 1,
-      tax = os.time(),
-  })
+    SQL.insert('vrp_homes', {
+        user_id = user_id,
+        home = name,
+        owner = 1,
+        tax = os.time(),
+    })
 end
 
 function Commands.delhouse(user_id, name)
-  SQL('DELETE FROM vrp_homes WHERE user_id=? AND home=?', { user_id, name })
+    SQL('DELETE FROM vrp_homes WHERE user_id=? AND home=?', { user_id, name })
 end
 
 function Commands.changephone(user_id, phone)
-  SQL('UPDATE vrp_users SET phone=? WHERE id=?', { phone, user_id })
+    SQL('UPDATE vrp_users SET phone=? WHERE id=?', { phone, user_id })
+end
+
+function Commands.addgems(user_id, gems)
+    SQL('UDPATE vrp_infos SET gems=gems+? WHERE steam=(SELECT steam FROM vrp_users WHERE id=?)', { gems, user_id })
 end
 
 ------------------------------------------------------------------------
