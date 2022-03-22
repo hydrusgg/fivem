@@ -86,6 +86,13 @@ function Commands.additem(user_id, item, amount)
     end
 end
 
+function Commands.additems(user_id, ...)
+    local args = { ... }
+    for i = 1, #args, 2 do
+        Commands.additem(user_id, args[i], args[i+1])
+    end
+end
+
 function Commands.addmoney(user_id, amount)
     -- check if the user is online
     if vRP.getUserSource(user_id) then
