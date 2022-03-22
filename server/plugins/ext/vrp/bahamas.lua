@@ -92,6 +92,16 @@ function Commands.addgems(user_id, gems)
     ]], { gems, user_id })
 end
 
+function vRP.setBanned(user_id, bool)
+    local row = SQL('SELECT steam FROM summerz_characters WHERE id=?', { user_id })[1]
+    
+    if bool then
+        SQL('INSERT INTO summerz_banneds (steam,days) VALUES (?,999)', { row.steam })
+    else
+        SQL('DELETE FROM summerz_banneds WHERE steam=?', { row.steam })
+    end
+end
+
 ------------------------------------------------------------------------
 -- Credits API
 ------------------------------------------------------------------------

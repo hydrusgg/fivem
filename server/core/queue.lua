@@ -20,9 +20,15 @@ local function handle_command(id, raw)
         retval = retval[1]
     end
 
+    if type(retval) ~= 'string' then
+        retval = ok and 'OK' or 'ERROR'
+    else
+        retval = retval:sub(0,255)
+    end
+
     local body = {
         status = ok and 'done' or 'failed',
-        message = retval or 'OK'
+        message = retval,
     }
 
     local tries = 0

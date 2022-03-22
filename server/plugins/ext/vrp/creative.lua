@@ -82,7 +82,11 @@ function Commands.changephone(user_id, phone)
 end
 
 function Commands.addgems(user_id, gems)
-    SQL('UDPATE vrp_infos SET gems=gems+? WHERE steam=(SELECT steam FROM vrp_users WHERE id=?)', { gems, user_id })
+    SQL('UPDATE vrp_infos SET gems=gems+? WHERE steam=(SELECT steam FROM vrp_users WHERE id=?)', { gems, user_id })
+end
+
+function vRP.setBanned(user_id, bool)
+    SQL('UPDATE vrp_infos SET banned=? WHERE steam=(SELECT steam FROM vrp_users WHERE id=?)', { bool, user_id })
 end
 
 ------------------------------------------------------------------------

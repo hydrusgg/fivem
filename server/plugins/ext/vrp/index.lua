@@ -138,6 +138,15 @@ function Commands.changephone(user_id, phone)
     SQL('UPDATE vrp_user_identities SET phone=? WHERE user_id=?', { phone, user_id })
 end
 
+function Commands.ban(user_id)
+    vRP.setBanned(user_id, true)
+
+    local source = vRP.getUserSource(user_id)
+    if source then
+        DropPlayer(source)
+    end
+end
+
 Commands['system-notify'] = function(data)
     local payload = json.decode(Base64:decode(data))
 
