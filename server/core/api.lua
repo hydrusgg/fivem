@@ -1,4 +1,4 @@
-local function http_request(url, method, data, headers)
+function http_request(url, method, data, headers)
     data = data or ''
     headers = headers or {}
 

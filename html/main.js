@@ -51,6 +51,10 @@ const app = new Vue({
     remote(name, ...args) {
       return this.callback('remote', name, ...args)
     },
+    open_url(url) {
+      console.log('Opening '+url)
+      window.invokeNative('openUrl', url)
+    },
     set_current(index) {
       this.error = ''
       this.form = {}

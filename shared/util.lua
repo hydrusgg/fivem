@@ -22,6 +22,12 @@ function assert(test, err)
     error(err)
 end
 
+function throw_if(test, err)
+    if test then
+        error(err)
+    end
+end
+
 function table.join(...)
     local res = {}
 

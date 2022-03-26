@@ -8,6 +8,10 @@ function main.popup(...)
     SendNUIMessage({ 'set_popup', ... })
 end
 
+function main.open_url(url)
+    SendNUIMessage({ 'open_url', url })
+end
+
 RegisterNUICallback('close', function(data, cb)
     SetNuiFocus(false, false)
     cb('empty')

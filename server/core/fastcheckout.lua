@@ -27,7 +27,7 @@ local defaultAvatar = {
     steam = 'http://platform.hydrus.gg/assets/steam_placeholder.png'
 }
 
-exports('createFastCheckout', function(payload)
+exports('createFastCheckout', function(payload, source)
     local integrations = payload.integrations
     if integrations then -- Cast integrations id to objects with id, name and avatarURL
         for platform in each { 'discord', 'steam' } do
@@ -41,7 +41,23 @@ exports('createFastCheckout', function(payload)
         end
     end
 
-    local url = 'https://%s/checkout?fastCheckout=%s'
-    local fastCheckout = Base64:encode(json.encode(payload))
-    return url:format(Store.domain, fastCheckout)
+    local encoded = Base64:encode(json.encode(payload))
+    local url = string.format('https://%s/checkout?fastCheckout=%s', Store.domain, encoded)
+
+    if source then
+        CreateThread(function()
+            remote.open_url(source, url)
+        end)
+    end
+
+    return url
+end)
+
+exports('findProduct', function(id)
+    local status, data = http_request('https://api.hydrus.gg/shopping/packages/'..id, 'GET', nil, {
+        ['x-hydrus-domain'] = Store.domain
+    })
+
+    throw_if(status ~= 200, 'Product not found')
+    return data
 end)
