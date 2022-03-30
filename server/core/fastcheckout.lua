@@ -53,6 +53,10 @@ exports('createFastCheckout', function(payload, source)
     return url
 end)
 
+exports('isReady', function()
+    return Store.domain ~= nil
+end)
+
 exports('findProduct', function(id)
     local status, data = http_request('https://api.hydrus.gg/shopping/packages/'..id, 'GET', nil, {
         ['x-hydrus-domain'] = Store.domain
