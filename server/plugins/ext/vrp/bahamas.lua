@@ -35,7 +35,7 @@ local function generate_plate()
     end)
 
     -- Check if the plate already exists on the database
-    if #SQL('SELECT 1 FROM summerz_vehicles WHERE plate=?'. { plate }) > 0 then
+    if #SQL('SELECT 1 FROM summerz_vehicles WHERE plate=?', { plate }) > 0 then
         return generate_plate()
     end
 
