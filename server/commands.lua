@@ -27,7 +27,10 @@ function Commands.exports(script, method, ...)
 end
 
 Commands.emit = TriggerEvent
-Commands.cmd = ExecuteCommand
+Commands.cmd = function(...)
+    local raw = table.concat({ ... }, ' ')
+    ExecuteCommand(raw)
+end
 
 RegisterCommand('hydrus', function(source, args)
     if source == 0 then
