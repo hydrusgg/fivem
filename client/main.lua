@@ -5,7 +5,7 @@ function main.open_store(clone)
 end
 
 function main.popup(...)
-    SendNUIMessage({ 'set_popup', ... })
+    SendNUIMessage({ 'add_popup', ... })
 end
 
 function main.open_url(url)

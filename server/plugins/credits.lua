@@ -23,6 +23,7 @@ local function get_credits(child, key)
 end
 
 local function add_credit(child, name, amount)
+    amount = amount or 1
     child = tostring(child)
     local credits = memcache[child] or {}
     local sum = (credits[name] or 0) + amount
@@ -36,7 +37,7 @@ end
 Commands.addcredit = add_credit
 
 local function sub_credit(child, name, amount)
-    add_credit(child, name, 0-amount)
+    add_credit(child, name, 0-(amount or 1))
 end
 
 Commands.subcredit = sub_credit
@@ -108,12 +109,20 @@ load_extension('products.lua')
 -- Command implementation
 ------------------------------------------------
 
+local id = 1
+
+local function next_id()
+    id = id + 1
+    return id
+end
+
 RegisterCommand('store', function(source, args)
     local credits = get_credits(to_child(source))
 
     local clone = {}
     for i,v in ipairs(ENV.products) do
         clone[i] = {
+            id = next_id(),
             name = v.name,
             category = v.category,
             image = v.image,
@@ -122,6 +131,8 @@ RegisterCommand('store', function(source, args)
             consume = v.consume[2],
         }
     end
+
+    id = 0
 
     remote.open_store(source, clone)
 end)

@@ -186,9 +186,6 @@ Commands['system-notify'] = function(data)
         CreateThread(function()
             for item in each(order.packages) do
                 remote.popup(source, item.name, item.image and item.image.url or 'http://platform.hydrus.gg/assets/image_unavailable.jpg')
-                Wait(3000)
-                remote.popup(source)
-                Wait(1000)
             end
         end)
     end

@@ -12,6 +12,10 @@ const remote = new Proxy({}, {
   }
 })
 
+const popups = []
+
+const sleep = ms => new Promise(res => setTimeout(res, ms))
+
 const app = new Vue({
   el: '#root',
   data: {
@@ -26,7 +30,7 @@ const app = new Vue({
   },
   computed: {
     current() {
-      return this.credits[this.checkout]
+      return this.products[this.checkout]
     },
     products() {
       return this.credits.filter(c => c.category === this.category)
@@ -60,12 +64,26 @@ const app = new Vue({
       this.form = {}
       this.checkout = index
     },
-    set_popup(name, image) {
-      if (!name) {
-        this.popup = {}
-      } else {
-        this.popup = { name, image, visible:true }
+    add_popup(name, image) {
+      const img = new Image()
+      img.onload = img.onerror = async () => {
+        popups.push({ name, image, visible: true })
+        if (!popups.running) {
+          popups.running = true
+
+          let next
+          while (next = popups.shift()) {
+            this.popup = next
+            await sleep(3000)
+            this.popup = {}
+            await sleep(500)
+          }
+
+          this.popup = {}
+          popups.running = false
+        }
       }
+      img.src = image
     },
     set_visible(b) {
       this.visible = b
@@ -80,12 +98,11 @@ const app = new Vue({
     },
     redeem() {
       const credit = this.current
-      remote.redeem(this.checkout+1, this.form).then(() => {
+      const id = this.credits.findIndex(p => p === credit) + 1
+
+      remote.redeem(id, this.form).then(() => {
         this.close()
-        this.set_popup(credit.name, credit.image)
-        setTimeout(() => {
-          this.set_popup()
-        }, 3000)
+        this.add_popup(credit.name, credit.image)
       }).catch(err => {
         this.error = err.substring(err.lastIndexOf(':')+1).trim()
       })
