@@ -82,3 +82,8 @@ function load_extension(name)
     end
     return ok, err
 end
+
+function main.get_url()
+    while not Store.domain do Wait(250) end
+    return Store.domain
+end

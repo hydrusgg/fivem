@@ -25,6 +25,8 @@ const app = new Vue({
     category: null,
     popup: {},
     error: '',
+    iframe_url: '',
+    iframe_padding: '8rem',
     form: {},
     lang: {},
   },
@@ -38,6 +40,9 @@ const app = new Vue({
     categories() {
       return this.credits.map(c => c.category).filter((o, i, a) => a.indexOf(o) == i)
     },
+    iframe_border_radius() {
+      return this.iframe_padding == '0' ? '0' : '1rem'
+    }
   },
   watch: {
     categories(v) {
@@ -55,8 +60,19 @@ const app = new Vue({
     remote(name, ...args) {
       return this.callback('remote', name, ...args)
     },
+    open_iframe(url) {
+      this.iframe_url = url
+      this.iframe_padding = '8rem'
+    },
+    toggle_iframe() {
+      const fullscreen = this.iframe_padding == '0'
+      if (fullscreen) {
+        this.iframe_padding = '8rem'
+      } else {
+        this.iframe_padding = '0'
+      }
+    },
     open_url(url) {
-      console.log('Opening '+url)
       window.invokeNative('openUrl', url)
     },
     set_current(index) {
@@ -111,6 +127,7 @@ const app = new Vue({
       this.visible = false
       this.checkout = false
       this.selected = false
+      this.iframe_url = ''
       this.callback('close')
     },
     _(name, args) {

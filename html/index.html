@@ -46,7 +46,15 @@
         <img class="w-96 my-20 rounded-lg" :src="popup.image">
       </div>
     </transition>
-    <div v-if="!popup.visible && visible" class="bg-black/50 w-screen h-screen grid place-items-center">
+    <div v-if="iframe_url" class="absolute overflow-hidden bg-white flex flex-col" :style="{ inset: iframe_padding, borderRadius: iframe_border_radius }">
+      <div class="bg-neutral-900 h-10 flex items-center pl-4 space-x-4">
+        <button @click="close" class="bg-red-600 w-5 h-5 rounded-full"></button>
+        <button @click="toggle_iframe" class="bg-yellow-500 w-5 h-5 rounded-full"></button>
+        <button class="bg-green-500 w-5 h-5 rounded-full"></button>
+      </div>
+      <iframe :src="iframe_url" class="flex-1" frameborder="0"></iframe>
+    </div>
+    <div v-else-if="!popup.visible && visible" class="bg-black/50 w-screen h-screen grid place-items-center">
       <div class="bg-[#212123] w-[90rem] h-[50rem] rounded-lg overflow-hidden flex">
         <div class="bg-[#191919] w-64 flex-shrink-0 h-full p-5">
           <h1 class="text-white text-xl text-center font-bold">{{_('categories')}}</h1>
