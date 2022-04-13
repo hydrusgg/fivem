@@ -163,7 +163,7 @@ function Commands.whitelist(user_id)
 end
 
 function Commands.reset_character(user_id)
-    SQL('UPDATE vrp_user_data SET dvalue=0 WHERE dkey='vRP:spawnController' AND user_id=?', { user_id })
+    SQL('UPDATE vrp_user_data SET dvalue=0 WHERE dkey=? AND user_id=?', { 'vRP:spawnController', user_id })
 end
 
 Commands['system-notify'] = function(data)
