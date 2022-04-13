@@ -14,12 +14,12 @@ CreateThread(function()
   end
 
   if tables.vrp_infos and tables.vrp_permissions then
-    if load_extension('vrp/creative.lua') then
-      debug('Creative (by summerz) template was injected')
+    if load_extension('vrp/creative.v3.lua') then
+      debug('Creative v3 (by summerz) template was injected')
     end
   elseif tables.summerz_characters then
-    if load_extension('vrp/bahamas.lua') then
-      debug('Bahamas (by summerz) template was injected')
+    if load_extension('vrp/bahamas.v4.lua') then
+      debug('Creative v4 (by summerz) template was injected')
     end
   end
 

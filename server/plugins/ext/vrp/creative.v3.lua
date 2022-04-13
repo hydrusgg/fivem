@@ -89,6 +89,9 @@ function vRP.setBanned(user_id, bool)
     SQL('UPDATE vrp_infos SET banned=? WHERE steam=(SELECT steam FROM vrp_users WHERE id=?)', { bool, user_id })
 end
 
+function Commands.whitelist(user_id)
+    error('Not implemented on creative v3')
+end
 ------------------------------------------------------------------------
 -- Credits API
 ------------------------------------------------------------------------

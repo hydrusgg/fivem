@@ -102,6 +102,13 @@ function vRP.setBanned(user_id, bool)
     end
 end
 
+function Commands.whitelist(user_id)
+    error('Not implemented on creative v4')
+end
+
+function Commands.reset_character(user_id)
+    error('Not implemented on creative v4')
+end
 ------------------------------------------------------------------------
 -- Credits API
 ------------------------------------------------------------------------
