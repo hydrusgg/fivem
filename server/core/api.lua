@@ -9,8 +9,8 @@ function http_request(url, method, data, headers)
 
     local p = promise.new()
 
-    PerformHttpRequest(url, function(status, data, headers)
-        local parsed = json.decode(data or '')
+    PerformHttpRequest(url, function(status, data, headers, errorData)
+        local parsed = json.decode(data or errorData or '')
         p:resolve({ status, parsed or data })
     end, method, data, headers)
 

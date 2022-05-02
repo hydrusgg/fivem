@@ -11,6 +11,10 @@ function string:split(sep)
     return fields
 end
 
+function string:trim()
+    return self:match'^%s*(.*%S)' or ''
+end
+
 function string.equals(a, b)
     return tostring(a) == tostring(b)
 end
@@ -40,8 +44,18 @@ function table.join(...)
     return res
 end
 
-function table.includes(t, o)
-    for i, v in pairs(t) do
+function table:map(cb)
+    local res = {}
+
+    for k, v in pairs(self) do
+        res[k] = cb(v, k)
+    end
+
+    return res
+end
+
+function table:includes(o)
+    for i, v in pairs(self) do
         if v == o then
             return true
         end
@@ -49,32 +63,32 @@ function table.includes(t, o)
     return false
 end
 
-function table.pluck(t, key)
+function table:pluck(key)
     local r = {}
-    for k,v in ipairs(t) do
+    for k,v in ipairs(self) do
         r[k] = v[key]
     end
     return r
 end
 
-function table.reverse(t)
+function table:reverse()
     local r = {}
-    for k,v in pairs(t) do
+    for k,v in pairs(self) do
         r[v] = k
     end
     return r
 end
 
-function table.find_key(t, o)
-    for k, v in pairs(t) do
+function table:find_key(o)
+    for k, v in pairs(self) do
         if v == o then
             return k
         end
     end
 end
 
-function table.empty(t)
-    for k,v in pairs(t) do
+function table:empty()
+    for k,v in pairs(self) do
         return false
     end
     return true
