@@ -3,7 +3,8 @@
 
 <head>
   <meta charset='utf-8'>
-  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@100;300;400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;300;400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet"> 
   <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v6.0.0-beta3/css/all.css"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
   <script defer src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
@@ -13,19 +14,19 @@
     /* Responsive stuff */
     @media(max-width: 1360px) {
       html {
-        font-size: 12px
+        font-size: 12px;
       }
     }
 
-    @media(min-width: 2880px) {
+    @media(min-width: 1800px) {
       html {
-        font-size: 16px
+        font-size: 16px;
       }
     }
 
     @media(min-width: 3456px) {
       html {
-        font-size: 32px
+        font-size: 32px;
       }
     }
 
@@ -35,7 +36,7 @@
   </style>
 </head>
 
-<body style="display: none;" class="font-[Rubik] select-none">
+<body style="display: none;" class="font-[Montserrat] select-none">
   <div id="root">
     <transition
       enter-active-class="animate__animated animate__fadeIn"
@@ -45,7 +46,18 @@
         <h1 class="text-white text-5xl">{{popup.name}}</h1>
         <img class="w-96 my-20 rounded-lg" :src="popup.image">
       </div>
+      <div v-if="!popup.visible && !visible && pending > 0">
+        <div class="bg-black/80 w-48 h-24 rounded absolute bottom-1/2 right-4 p-1 text-sm">
+          <h1 class="text-white/50 font-bold">{{ _('notify.title') }}</h1>
+          <p class="text-white text-xs mt-2">
+            <span v-if="pending==1">{{ _('notify.subtitle.one') }}</span>
+            <span v-else>{{ _('notify.subtitle.many', { count: pending }) }}</span>
+          </p>
+          <span class="text-white/30 text-xs">{{ _('notify.footer') }}</span>
+        </div>
+      </div>
     </transition>
+
     <div v-if="iframe_url" class="absolute overflow-hidden bg-white flex flex-col" :style="{ inset: iframe_padding, borderRadius: iframe_border_radius }">
       <div class="bg-neutral-900 h-10 flex items-center pl-4 space-x-4">
         <button @click="close" class="bg-red-600 w-5 h-5 rounded-full"></button>
@@ -55,51 +67,60 @@
       <iframe :src="iframe_url" class="flex-1" frameborder="0"></iframe>
     </div>
     <div v-else-if="!popup.visible && visible" class="bg-black/50 w-screen h-screen grid place-items-center">
-      <div class="bg-[#212123] w-[90rem] h-[50rem] rounded-lg overflow-hidden flex">
-        <div class="bg-[#191919] w-64 flex-shrink-0 h-full p-5">
-          <h1 class="text-white text-xl text-center font-bold">{{_('categories')}}</h1>
-  
-          <ul class="mt-8">
-            <li v-for="item in categories" class="text-[#8C8F98] hover:text-[#cdced1] transition-all"
-              :class="{ 'text-[#cdced1] translate-x-2': category==item }">
-              <button @click="set_category(item)">
-                {{ item }}
-              </button>
-            </li>
-          </ul>
+      <div class="bg-[#212123] w-[80rem] h-[40rem] rounded-lg overflow-hidden flex">
+        <div v-if="checkout === false" class="w-full h-full flex flex-col">
+          
+          <h1 class="text-white shadow-xl p-5 text-4xl font-bold">{{ _('nui.title') }}</h1>
+          
+
+          <div class="flex-1 grid grid-cols-3 items-stretch gap-5 overflow-y-auto p-5">
+            <div v-for="data,index in filtered" class="p-5 bg-[#28282A] scale-95 hover:scale-100 transition-all shadow-xl rounded-lg flex flex-col" :key="index">
+              <h1 class="text-3xl text-center text-white mb-4">{{data.name}}</h1>
+              <img class="w-full rounded-lg" :src="data.image">
+              
+              <div class="mt-auto">
+                <button class="bg-gradient-to-r border hover:bg-white hover:text-black font-bold transition-all rounded w-full p-2 px-4 text-white uppercase"
+                  @click="checkout = data">
+                  {{_('redeem')}}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-        <div v-if="checkout === false" class="w-full h-full grid grid-cols-3 items-start gap-10 overflow-y-auto p-10">
-          <div class="p-5 bg-[#28282A] scale-95 hover:scale-100 transition-all shadow-xl rounded-lg" v-for="data,index in products" :key="index">
-            <img class="w-full mb-2" :src="data.image">
-            <h1 class="text-3xl text-white font-bold my-2">{{data.name}}</h1>
-            <button v-if="data.credits>=data.consume" class="bg-gradient-to-br from-purple-600 to-violet-800 rounded-full p-2 px-4 text-white" @click="set_current(index)">
-              <span v-if="data.consume>1">{{_('redeem.many', { amount: data.consume })}}</span>
-              <span v-else>{{_('redeem.one', { amount: data.consume })}}</span>
+        <div v-else class="flex-1">
+          <div class="flex p-5 text-4xl text-white shadow-xl">
+            <button class="mr-4" @click="checkout=false">
+              <i class="fas fa-arrow-left"></i>
             </button>
-            <button v-else class="bg-gradient-to-br from-red-500 to-rose-800 py-2 px-4 rounded-full text-white">{{_('credits.insufficient')}}</button>
-          </div>
-        </div>
-        <div v-else class="p-10 flex-1">
-          <div class="mb-5">
-            <h1 class="text-white text-center text-3xl font-bold">{{_('redeem')}} {{current.name}}</h1>
+            <h1 class="uppercase font-bold">
+              {{_('redeem')}} {{checkout.name}}
+            </h1>
           </div>
   
-          <div v-for="field in current.form" :key="field.name">
-            <h1 class="text-white text-2xl mb-2">{{field.label}}</h1>
-            <select class="p-2 w-1/2 focus:outline-none bg-[#28282A] border border-[#464A4E] rounded-xl text-white" v-if="field.options" v-model="form[field.name]">
-              <option :value="undefined" disabled>{{_('select.option')}}</option>
-              <option v-for="option,index in field.options" :key="index" :value="option.value">
-                {{option.label}}
-              </option>
-            </select>
-            <input class="p-2 w-1/2 focus:outline-none" v-else-if="field.placeholder" :placeholder="field.placeholder" v-model="form[field.name]">
+          <div class="p-5">
+            <div v-for="field in checkout.form" :key="field.name">
+              <h1 class="text-white text-2xl mb-2">{{field.label}}</h1>
+              <select class="p-2 w-1/2 focus:outline-none bg-[#28282A] border border-[#464A4E] rounded text-white" v-if="field.options" v-model="form[field.name]">
+                <option :value="undefined" disabled>{{_('select.option')}}</option>
+                <option v-for="option,index in field.options" :key="index" :value="option.value">
+                  {{option.label}}
+                </option>
+              </select>
+              <input class="p-2 w-1/2 focus:outline-none" v-else-if="field.placeholder" :placeholder="field.placeholder" v-model="form[field.name]">
+            </div>
+    
+            <h1 v-if="error" class="text-red-500">{{error}}</h1>
+    
+            <div class="mt-4 space-x-4 uppercase">
+              <button class="border hover:bg-white hover:text-black transition-all text-white p-2 px-4 rounded uppercase font-bold" @click="redeem">
+                {{_('confirm')}}
+              </button>
+  
+              <button v-if="checkout.type=='vehicle'" class="border hover:bg-white hover:text-black transition-all text-white p-2 px-4 rounded uppercase font-bold" @click="testdrive">
+                {{_('testdrive')}}
+              </button>
+            </div>
           </div>
-  
-          <h1 v-if="error" class="text-red-500">{{error}}</h1>
-  
-          <button class="bg-gradient-to-br from-purple-600 to-violet-800 hover:bg-purple-700 transition-all text-white p-2 px-4 rounded-full mt-4" @click="redeem">
-            {{_('confirm')}}
-          </button>
         </div>
       </div>
     </div>

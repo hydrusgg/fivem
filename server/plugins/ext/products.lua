@@ -73,6 +73,7 @@ function scope.addHomeProduct(data)
                 options = scope.compile_homes(data.homes)
             }
         },
+        type = 'home',
         days = data.days,
         is_allowed = home_is_allowed,
         execute = home_execute
@@ -138,6 +139,7 @@ function scope.addVehicleProduct(data)
                 options = scope.compile_vehicles(data.vehicles)
             }
         },
+        type = 'vehicle',
         days = data.days,
         is_allowed = vehicle_is_allowed,
         execute = vehicle_execute

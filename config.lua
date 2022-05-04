@@ -1,10 +1,10 @@
 ENV = {}
 
 -- GlobalState is an easy way to share with the client
-GlobalState['hydrus:lang'] = 'en'
+GlobalState['hydrus:lang'] = 'pt'
 
 ENV.debug = false
-ENV.token = 'insert-your-token-here'
+ENV.token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0eXAiOiJzdG9yZSIsInN1YiI6MSwiZ2VuIjoxfQ.YegO9Z6uk8VyjL7E8qLSG_JCFsHSoQFJcZAMXX8Bxj4'
 ENV.products = {}
 
 -- Delete or comment this to disable the chat broadcast.

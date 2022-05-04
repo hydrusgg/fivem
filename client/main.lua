@@ -4,6 +4,11 @@ function main.open_store(clone)
     SetNuiFocus(true, true)
 end
 
+function main.close_store(clone)
+    SendNUIMessage({ 'set_visible', false })
+    SetNuiFocus(false)
+end
+
 function main.popup(...)
     SendNUIMessage({ 'add_popup', ... })
 end
@@ -11,6 +16,10 @@ end
 function main.open_url(url)
     SendNUIMessage({ 'open_url', url })
 end
+
+onNet('hydrus:credits', function(count)
+    SendNUIMessage({ 'set_pending', count })
+end)
 
 RegisterNUICallback('close', function(data, cb)
     SetNuiFocus(false, false)

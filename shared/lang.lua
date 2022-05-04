@@ -29,6 +29,13 @@ LANG = {
         ['connection.outage'] = 'Five consecutives errors ocorrured, rtc outage?\nTrying again in 60 seconds...',
         ['extension.not_found'] = 'Fail to load extension :name -> File not found',
         ['extension.error'] = 'Fail to load extension :name -> :error',
+        ['testdrive'] = 'Test drive',
+
+        ['nui.title'] = 'REDEEM BENEFITS',
+        ['notify.title'] = 'BENEFITS',
+        ['notify.subtitle.one'] = 'You have 1 redeemable item',
+        ['notify.subtitle.many'] = 'You have :count redeemable items',
+        ['notify.footer'] = 'Type /store to redeem',
 
         ['chat.template'] = '{0} just reedemed {1}',
     },
@@ -56,6 +63,13 @@ LANG = {
         ['connection.outage'] = 'Cinco erros consecutivos, rtc outage?\nTentando novamente em 60 segundos...',
         ['extension.not_found'] = 'Falha ao carregar a extensão :name -> Arquivo não encontrado',
         ['extension.error'] = 'Falha ao carregar a extensão :name -> :error',
+        ['testdrive'] = 'Test drive',
+
+        ['nui.title'] = 'RESGATE DE BENEFÍCIOS',
+        ['notify.title'] = 'BENEFÍCIOS',
+        ['notify.subtitle.one'] = 'Você possui 1 item resgatável',
+        ['notify.subtitle.many'] = 'Você possui :count itens resgatáveis',
+        ['notify.footer'] = 'Digite /store para resgatar',
 
         ['chat.template'] = '{0} comprou {1}',
     }

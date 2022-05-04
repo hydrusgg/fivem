@@ -9,6 +9,16 @@
 -------------------------------------------------------------------------------------------
 local memcache = json.decode(LoadResourceFile(GetCurrentResourceName(), 'database/credits.json') or '{}')
 
+-- At the moment, only vRP is supported
+local function to_child(source)
+    return tostring(vRP.getUserId(source))
+end
+
+-- At the moment, only vRP is supported
+local function from_child(child)
+    return vRP.getUserSource(parse_int(child))
+end
+
 local function get_credit(child, name)
     child = tostring(child)
     return optional(memcache, child, name) or 0
@@ -32,6 +42,7 @@ local function add_credit(child, name, amount)
     memcache[child] = ternary(table.empty(credits), nil, credits)
 
     SaveResourceFile(GetCurrentResourceName(), 'database/credits.json', json.encode(memcache), -1)
+    notify_credits(child, from_child(child))
 end
 
 Commands.addcredit = add_credit
@@ -42,11 +53,37 @@ end
 
 Commands.subcredit = sub_credit
 
-local function to_child(source)
-    -- Change this if you don't use vRP
-    -- Return something unique from that source, like steam hex or user_id
-    return tostring(vRP.getUserId(source))
+function notify_credits(child, source)
+    if not source then
+        return
+    end
+
+    local user_credits = get_credits(child)
+
+    local i = 0
+
+    for index,v in ipairs(ENV.products) do
+        local credit, amount = table.unpack(v.consume)
+        local balance = user_credits[credit] or 0
+
+        if balance >= amount then
+            i+= 1 
+        end
+    end
+    
+    emitNet('hydrus:credits', source, i)
 end
+
+AddEventHandler('hydrus:products-ready', function(scope)
+    Wait(10e3)
+
+    for _, source in ipairs(GetPlayers()) do
+        local child = to_child(source)
+        if child ~= 'nil' then
+            notify_credits(child, source)
+        end
+    end
+end)
 
 local redeem_lock = {}
 
@@ -101,6 +138,31 @@ function main.redeem(source, index, form)
     end)
 end
 
+local in_testdrive = {}
+
+function main.testdrive(source, spawn)
+    throw_if(in_testdrive[source], 'Already in testdrive')
+    in_testdrive[source] = {
+        bucket = GetPlayerRoutingBucket(source),
+        origin = GetEntityCoords(GetPlayerPed(source))
+    }
+
+    SetPlayerRoutingBucket(source, 1000 + source)
+
+    remote.start_testdrive(source, spawn)
+end
+
+function main.exit_testdrive(source)
+    local info = in_testdrive[source]
+    if info then
+        SetPlayerRoutingBucket(source, info.bucket)
+
+        local x,y,z = table.unpack(info.origin)
+        SetEntityCoords(GetPlayerPed(source), x, y, z)
+        in_testdrive[source] = nil
+    end
+end
+
 ------------------------------------------------
 -- Create all the products
 ------------------------------------------------
@@ -108,31 +170,33 @@ load_extension('products.lua')
 ------------------------------------------------
 -- Command implementation
 ------------------------------------------------
-
-local id = 1
-
-local function next_id()
-    id = id + 1
-    return id
-end
-
 RegisterCommand('store', function(source, args)
-    local credits = get_credits(to_child(source))
-
-    local clone = {}
-    for i,v in ipairs(ENV.products) do
-        clone[i] = {
-            id = next_id(),
-            name = v.name,
-            category = v.category,
-            image = v.image,
-            form = v.form,
-            credits = credits[v.consume[1]] or 0,
-            consume = v.consume[2],
-        }
+    if in_testdrive[source] then
+        return
     end
 
-    id = 0
+    local user_credits = get_credits(to_child(source))
+
+    local clone = {}
+    for index,v in ipairs(ENV.products) do
+        local credit, amount = table.unpack(v.consume)
+        local balance = user_credits[credit] or 0
+
+        if balance >= amount then
+            table.insert(clone, {
+                id = index,
+                type = v.type,
+                name = v.name,
+                image = v.image,
+                form = v.form,
+                credits = balance,
+            })
+        end
+    end
+
+    if #clone == 0 then
+        return
+    end
 
     remote.open_store(source, clone)
 end)

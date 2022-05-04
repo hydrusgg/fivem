@@ -20,25 +20,23 @@ const app = new Vue({
   el: '#root',
   data: {
     visible: !!location.port,
+    pending: 0,
+
     credits: [],
     checkout: false,
-    category: null,
+    form: {},
+
     popup: {},
-    error: '',
+
     iframe_url: '',
     iframe_padding: '8rem',
-    form: {},
+
+    error: '',
     lang: {},
   },
   computed: {
-    current() {
-      return this.products[this.checkout]
-    },
-    products() {
-      return this.credits.filter(c => c.category === this.category)
-    },
-    categories() {
-      return this.credits.map(c => c.category).filter((o, i, a) => a.indexOf(o) == i)
+    filtered() {
+      return this.credits.slice(0, 3)
     },
     iframe_border_radius() {
       return this.iframe_padding == '0' ? '0' : '1rem'
@@ -47,6 +45,10 @@ const app = new Vue({
   watch: {
     categories(v) {
       this.category = v[0]
+    },
+    checkout() {
+      this.form = {}
+      this.error = ''
     }
   },
   methods: {
@@ -75,11 +77,6 @@ const app = new Vue({
     open_url(url) {
       window.invokeNative('openUrl', url)
     },
-    set_current(index) {
-      this.error = ''
-      this.form = {}
-      this.checkout = index
-    },
     add_popup(name, image) {
       const img = new Image()
       img.onload = img.onerror = async () => {
@@ -107,26 +104,30 @@ const app = new Vue({
     set_credits(credits) {
       this.credits = credits
     },
-    set_category(category) {
-      this.category = category
-      this.checkout = false
-      this.form = {}
+    set_pending(count) {
+      this.pending = count
     },
     redeem() {
-      const credit = this.current
-      const id = this.credits.findIndex(p => p === credit) + 1
+      const item = this.checkout
 
-      remote.redeem(id, this.form).then(() => {
+      remote.redeem(item.id, this.form).then(() => {
         this.close()
-        this.add_popup(credit.name, credit.image)
+        this.add_popup(item.name, item.image)
       }).catch(err => {
         this.error = err.substring(err.lastIndexOf(':')+1).trim()
       })
     },
+    testdrive() {
+      if (this.form.vehicle) {
+        remote.testdrive(this.form.vehicle)
+        this.close()
+      } else {
+        this.error = this._('select.option')
+      }
+    },
     close() {
       this.visible = false
       this.checkout = false
-      this.selected = false
       this.iframe_url = ''
       this.callback('close')
     },
@@ -216,6 +217,7 @@ if (location.hostname === '127.0.0.1') {
     'redeem.many': 'Resgatar vários',
     'redeem': 'Resgatar',
     'confirm': 'Confirmar',
-    'credits.insufficient': 'Créditos insuficientes'
+    'credits.insufficient': 'Créditos insuficientes',
+    'testdrive': 'TEST DRIVE'
   }
 }

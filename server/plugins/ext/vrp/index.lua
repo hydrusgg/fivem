@@ -207,7 +207,7 @@ end
 -- SCHEDULER
 ------------------------------------------------------------------------
 
-AddEventHandler('vRP:playerSpawn', function(user_id)
+AddEventHandler('vRP:playerSpawn', function(user_id, source)
     local all = Scheduler.find(user_id)
     if #all > 0 then
         for _, data in ipairs(all) do
@@ -218,6 +218,7 @@ AddEventHandler('vRP:playerSpawn', function(user_id)
         end
         Scheduler.save()
     end
+    pcall(notify_credits, tostring(user_id), source)
 end)
 
 ------------------------------------------------------------------------
