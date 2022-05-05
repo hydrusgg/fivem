@@ -24,4 +24,5 @@ CreateThread(function()
   end
 
   wait_before_intelisense = false
+  emit('hydrus:intelisense-ready')
 end)

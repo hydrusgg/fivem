@@ -34,7 +34,7 @@ LANG = {
         ['nui.title'] = 'REDEEM BENEFITS',
         ['notify.title'] = 'BENEFITS',
         ['notify.subtitle.one'] = 'You have 1 redeemable item',
-        ['notify.subtitle.many'] = 'You have :count redeemable items',
+        ['notify.subtitle.many'] = 'You have up to :count redeemable items',
         ['notify.footer'] = 'Type /store to redeem',
 
         ['chat.template'] = '{0} just reedemed {1}',
@@ -67,8 +67,8 @@ LANG = {
 
         ['nui.title'] = 'RESGATE DE BENEFÍCIOS',
         ['notify.title'] = 'BENEFÍCIOS',
-        ['notify.subtitle.one'] = 'Você possui 1 item resgatável',
-        ['notify.subtitle.many'] = 'Você possui :count itens resgatáveis',
+        ['notify.subtitle.one'] = 'Você pode resgatar 1 item',
+        ['notify.subtitle.many'] = 'Você pode resgatar até :count itens',
         ['notify.footer'] = 'Digite /store para resgatar',
 
         ['chat.template'] = '{0} comprou {1}',
