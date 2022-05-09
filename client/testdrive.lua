@@ -7,6 +7,11 @@ function main.start_testdrive(spawn)
 
     local x,y,z,h = table.unpack(test_location)
 
+    if IsWaypointActive() then
+        DeleteWaypoint()
+        Wait(3000)
+    end
+
     local ped = PlayerPedId()
     SetEntityCoords(ped, x, y, z)
 
@@ -15,7 +20,7 @@ function main.start_testdrive(spawn)
         Wait(50)
     end
 
-    local vehicle = CreateVehicle(spawn, x, y, z, h, true)
+    local vehicle = CreateVehicle(spawn, x, y, z, h, false)
     SetModelAsNoLongerNeeded(spawn)
 
     SetPedIntoVehicle(ped, vehicle, -1)

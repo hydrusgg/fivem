@@ -141,9 +141,11 @@ function print_if(bool, ...)
     end
 end
 
-function debug(...)
-    print_if(ENV.debug, ...)
-end
+setmetatable(debug, {
+    __call = function(...)
+        print_if(ENV.debug, ...)
+    end
+})
 
 function ternary(test, a, b)
     if test then 
