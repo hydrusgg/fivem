@@ -1,5 +1,11 @@
 Commands = {}
 
+function create_command_ref(alias, source)
+    Commands[alias] = function(...)
+        return Commands[source](...)
+    end
+end
+
 --[[
     Everything declared in the Commands table
     Will be acessible to the commands runtime
@@ -51,3 +57,5 @@ RegisterCommand('hydrus', function(source, args)
         Commands[name](table.unpack(args))
     end
 end)
+
+Commands.wait = Wait

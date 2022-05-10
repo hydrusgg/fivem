@@ -11,7 +11,7 @@ local memcache = json.decode(LoadResourceFile(GetCurrentResourceName(), 'databas
 
 -- At the moment, only vRP is supported
 local function to_child(source)
-    return tostring(vRP.getUserId(source))
+    return tostring(vRP.getUserId(source) or 'nil')
 end
 
 -- At the moment, only vRP is supported
@@ -52,6 +52,7 @@ local function sub_credit(child, name, amount)
 end
 
 Commands.subcredit = sub_credit
+Commands.delcredit = sub_credit
 
 function notify_credits(child, source)
     if not source then

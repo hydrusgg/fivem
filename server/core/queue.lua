@@ -38,6 +38,7 @@ local function handle_command(id, raw)
             if tries == 0 then
                 print('Failed to connect to the api endpoint, the script will try again')
             end
+            tries+= 1
             Wait(1e3)
         elseif status ~= 200 then
             printf('Failed to UPDATE the command {ID=%d, STATUS=%d} the script will try again in 10 seconds', id, status)
@@ -45,13 +46,13 @@ local function handle_command(id, raw)
         else
             return body
         end
-        tries+= 1
     end
 end
 
 -----------------------------------------------------
 Queue = {}
 Queue.pending = {}
+Queue.workers = {}
 
 function Queue:push(command)
     table.insert(self.pending, command)
@@ -70,22 +71,46 @@ function Queue:next()
 end
 
 function Queue:work()
+    local worker = { started_at = GetGameTimer() }
+    table.insert(self.workers, worker)
+
     CreateThread(function()
         while true do
             local job = self:next()
             if not job then
                 Wait(100)
             else
+                job.created_at = GetGameTimer()
+                worker.job = job
+
                 local ok, ret = pcall(handle_command, job.id, job.command)
                 if not ok then
                     print('Critical error: '..ret)
                 else
-                    debug('Command %d [%s] -> %s', job.id, ret.status, ret.message)
+                    logger('Command %d [%s] -> %s', job.id, ret.status, ret.message)
                 end
+
+                worker.job = nil
             end
         end
     end)
 end
+
+CreateThread(function()
+    while true do
+        for id, worker in ipairs(Queue.workers) do
+            local job = worker.job
+            if job then
+                local elapsed = GetGameTimer() - job.created_at
+                if elapsed >= 5000 and not worker.is_stuck then
+                    printf('[%dms] Worker %d got stuck running "%s" (ID=%d)', elapsed, id, job.command, job.id)
+                    worker.is_stuck = true
+                end
+            end
+        end
+        Wait(1000)
+    end
+end)
 
 -- You can add more workers, but one is fine
 -- Be careful when adding more workers, your commands must support concurrency and race condition

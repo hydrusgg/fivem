@@ -53,11 +53,13 @@ function Commands.group(user_id, group)
     -- check if the user is online
     if vRP.getUserSource(user_id) then
         vRP.addUserGroup(user_id, group)
+        return 'OK (Online)'
     else
         update_datatable(user_id, function(d)
             d.groups = d.groups or {}
             d.groups[group] = true
         end)
+        return 'OK (Offline)'
     end
 end
 
@@ -65,24 +67,28 @@ function Commands.ungroup(user_id, group)
     -- check if the user is online
     if vRP.getUserSource(user_id) then
         vRP.removeUserGroup(user_id, group)
+        return 'OK (Online)'
     else
         update_datatable(user_id, function(d)
             if d.groups then
                 d.groups[d] = nil
             end
         end)
+        return 'OK (Offline)'
     end
 end
-Commands.delgroup = Commands.ungroup
+create_command_ref('delgroup', 'ungroup')
 
 function Commands.additem(user_id, item, amount)
     -- check if the user is online
     if vRP.getUserSource(user_id) then
         vRP.giveInventoryItem(user_id, item, amount)
+        return 'OK (Online)'
     else
         -- Save for later execution, since the player is offline
         Scheduler.new(user_id, 'additem', user_id, item, amount)
         Scheduler.save()
+        return 'Scheduled'
     end
 end
 
@@ -97,8 +103,10 @@ function Commands.addmoney(user_id, amount)
     -- check if the user is online
     if vRP.getUserSource(user_id) then
         vRP.giveBankMoney(user_id, amount)
+        return 'OK (Online)'
     else
         SQL('UPDATE vrp_user_moneys SET bank=bank+? WHERE user_id=?', { amount, user_id })
+        return 'OK (Offline)'
     end
 end
 
@@ -151,6 +159,7 @@ function Commands.ban(user_id)
     local source = vRP.getUserSource(user_id)
     if source then
         DropPlayer(source)
+        return 'OK (Online)'
     end
 end
 
@@ -179,7 +188,7 @@ Commands['system-notify'] = function(data)
         local status,order = Hydrus('GET', '/orders/'..payload.order_id)
 
         if status ~= 200 then
-            debug('Failed to fetch order: %d', status)
+            logger('Failed to fetch order: %d', status)
             return 'Order not found'
         end
 
@@ -195,11 +204,9 @@ Commands['system-notify'] = function(data)
             })
         end
 
-        CreateThread(function()
-            for item in each(order.packages) do
-                remote.popup(source, item.name, item.image and item.image.url or 'http://platform.hydrus.gg/assets/image_unavailable.jpg')
-            end
-        end)
+        for item in each(order.packages) do
+            remote.popup_async(source, item.name, item.image and item.image.url or 'http://platform.hydrus.gg/assets/image_unavailable.jpg')
+        end
     end
     return '__delete__'
 end

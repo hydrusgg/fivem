@@ -25,7 +25,7 @@ SQL.drivers = {
 for driver in each(SQL.drivers) do
     if GetResourceState(driver[1]) == 'started' then
         SQL.driver = driver[2]
-        debug('Using driver %s', driver[1])
+        logger('Using driver %s', driver[1])
         break
     end
 end

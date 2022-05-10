@@ -15,7 +15,7 @@ CreateThread(function()
     end
 
     function listener(event, payload)
-        debug('Received event %s with %s', event, json.encode(payload))
+        logger('Received event %s with %s', event, json.encode(payload))
         if event == 'HANDSHAKE' then
             if payload.error then
                 print(_('connection.error', payload))

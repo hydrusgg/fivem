@@ -141,11 +141,9 @@ function print_if(bool, ...)
     end
 end
 
-setmetatable(debug, {
-    __call = function(...)
-        print_if(ENV.debug, ...)
-    end
-})
+function logger(...)
+    print_if(ENV.debug, ...)
+end
 
 function ternary(test, a, b)
     if test then 
@@ -169,14 +167,21 @@ remote = setmetatable({ __callbacks={} }, {
             local p = promise.new()
             o.__callbacks[id] = p
 
+            local is_async = name:match('(.+)_async$')
+
             -- id, name
             -- source, id, name
     
             local args = { ... }
             table.insert(args, is_server and 2 or 1, id)
-            table.insert(args, is_server and 3 or 2, name)
+            table.insert(args, is_server and 3 or 2, is_async or name)
 
             emitNet('hydrus:req', table.unpack(args))
+
+            if is_async then
+                return p
+            end
+
             return table.unpack(Citizen.Await(p))
         end
         return o[name]

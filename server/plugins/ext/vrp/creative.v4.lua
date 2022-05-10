@@ -18,7 +18,6 @@ end
 function Commands.ungroup(user_id, group)
     vRP.remPermission(user_id, group)
 end
-Commands.delgroup = Commands.ungroup
 
 function Commands.addmoney(user_id, amount)
     vRP.addBank(user_id, amount)
