@@ -49,9 +49,14 @@ local function update_datatable(user_id, cb) -- Wrapper to update datatable
     end
 end
 
+local function is_online(user_id) -- For some reason the vRP recognizes the source but throws silent errors
+    local source = vRP.getUserSource(user_id)
+    return source and source < 65500
+end
+
 function Commands.group(user_id, group)
     -- check if the user is online
-    if vRP.getUserSource(user_id) then
+    if is_online(user_id) then
         vRP.addUserGroup(user_id, group)
         return 'OK (Online)'
     else
@@ -65,7 +70,7 @@ end
 
 function Commands.ungroup(user_id, group)
     -- check if the user is online
-    if vRP.getUserSource(user_id) then
+    if is_online(user_id) then
         vRP.removeUserGroup(user_id, group)
         return 'OK (Online)'
     else
@@ -81,7 +86,7 @@ create_command_ref('delgroup', 'ungroup')
 
 function Commands.additem(user_id, item, amount)
     -- check if the user is online
-    if vRP.getUserSource(user_id) then
+    if is_online(user_id) then
         vRP.giveInventoryItem(user_id, item, amount)
         return 'OK (Online)'
     else
@@ -101,7 +106,7 @@ end
 
 function Commands.addmoney(user_id, amount)
     -- check if the user is online
-    if vRP.getUserSource(user_id) then
+    if is_online(user_id) then
         vRP.giveBankMoney(user_id, amount)
         return 'OK (Online)'
     else
