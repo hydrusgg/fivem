@@ -8,11 +8,13 @@ local scope = {}
     (LX, 1, 70) will output an table with 70 values
     LX01, LX02, LX03, LX04 ........... LX70
 ]]
-function scope.home_range(prefix, from, to)
+function scope.home_range(prefix, from, to, pad)
     local res = {}
 
     for i=from, to do
-        if i < 10 then i = '0'..i end
+        while #(tostring(i)) < pad do
+            i = '0'..i
+        end
         table.insert(res, {
             label = prefix .. i,
             value = prefix .. i
@@ -26,11 +28,11 @@ function scope.compile_homes(raw)
     local options = {}
     for _, part in ipairs(raw:split(',')) do
         local prefix, interval = table.unpack(part:split(':'))
-        local head, tail = table.unpack(interval:split('-'))
+        local head, tail, pad = table.unpack(interval:split('-'))
         if not tail then
             tail = head
         end
-        options = table.join(options, scope.home_range(prefix, parse_int(head), parse_int(tail)))
+        options = table.join(options, scope.home_range(prefix, parse_int(head), parse_int(tail), parse_int(pad or 2)))
     end
     return options
 end
