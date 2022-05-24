@@ -68,7 +68,7 @@ function notify_credits(child, source)
         local balance = user_credits[credit] or 0
 
         if balance >= amount then
-            i+= 1 
+            i = i + 1 
         end
     end
     
