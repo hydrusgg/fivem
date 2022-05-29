@@ -23,36 +23,38 @@ ENV.chat_styles = {
 AddEventHandler('hydrus:products-ready', function(scope)
     scope.addHomeProduct({
         name = 'Temporary Home', 
-        category = 'Homes',
         credit = 'temporary_home',
         -- image = 'https://i.imgur.com/SMxEwXT.png', (Default)
         homes = 'LX:1-70,FH:1-100',
-        days = 30
+        days = 30,
     })
     scope.addHomeProduct({
         name = 'Permanent Home',
-        category = 'Homes',
+        credit = 'permanent_home',
+        -- image = 'https://i.imgur.com/SMxEwXT.png', (Default)
+        homes = 'LX:1-70,FH:1-100,Middle:1-100',
+    })
+    scope.addHomeProduct({
+        name = 'Permanent Home',
         credit = 'permanent_home',
         -- image = 'https://i.imgur.com/SMxEwXT.png', (Default)
         homes = 'LX:1-70,FH:1-100',
     })
     scope.addVehicleProduct({
         name = 'Temporary Vehicle',
-        category = 'Vehicles',
         credit = 'temporary_vehicle',
         -- image = 'https://i.imgur.com/samafbT.png', (Default)
         days = 30,
         vehicles = {
-            hakuchou = 'Hakuchou'
+            ['hakuchou'] = 'Hakuchou'
         }
     })
     scope.addVehicleProduct({
         name = 'Permanent Vehicle',
-        category = 'Vehicles',
         credit = 'permanent_vehicle',
         -- image = 'https://i.imgur.com/samafbT.png', (Default)
         vehicles = {
-            hakuchou = 'Hakuchou'
+            ['hakuchou'] = 'Hakuchou'
         }
     })
     

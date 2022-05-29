@@ -7,7 +7,7 @@ shared_scripts {
     'shared/*'
 }
 
-version '1.4.5'
+version '1.4.6'
 
 lua54 'yes'
 

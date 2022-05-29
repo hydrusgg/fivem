@@ -32,7 +32,7 @@ local function renderBlip(vec)
 end
 
 CreateThread(function()
-    if not blips then
+    if #blips == 0 then
         return
     end
 
