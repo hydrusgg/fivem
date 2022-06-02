@@ -18,7 +18,7 @@ CreateThread(function()
       logger('Creative v3 (by summerz) template was injected')
     end
   elseif tables.summerz_characters then
-    if load_extension('vrp/bahamas.v4.lua') then
+    if load_extension('vrp/creative.v4.lua') then
       logger('Creative v4 (by summerz) template was injected')
     end
   end
