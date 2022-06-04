@@ -66,10 +66,7 @@ function notify_credits(child, source)
     for index,v in ipairs(ENV.products) do
         local credit, amount = table.unpack(v.consume)
         local balance = user_credits[credit] or 0
-
-        if balance >= amount then
-            i+= 1 
-        end
+        i+= math.floor(balance / amount)
     end
     
     emitNet('hydrus:credits', source, i)
