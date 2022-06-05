@@ -40,7 +40,7 @@ local function handle_command(id, raw)
             end
             tries+= 1
             Wait(1e3)
-        elseif status ~= 200 then
+        elseif status ~= 200 and status ~= 404 then
             printf('Failed to UPDATE the command {ID=%d, STATUS=%d} the script will try again in 10 seconds', id, status)
             Wait(10e3)
         else
