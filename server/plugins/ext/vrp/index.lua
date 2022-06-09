@@ -128,8 +128,20 @@ function Commands.addvehicle(user_id, vehicle)
     })
 end
 
+function Commands.addvehicles(user_id, ...)
+    for _, spawn in ipairs({ ... }) do
+        Commands.addvehicle(user_id, spawn)
+    end
+end
+
 function Commands.delvehicle(user_id, vehicle)
     SQL('DELETE FROM vrp_user_vehicles WHERE user_id=? AND vehicle=?', { user_id, vehicle })
+end
+
+function Commands.delvehicles(user_id, ...)
+    for _, spawn in pairs({ ... }) do
+        Commands.delvehicle(user_id, spawn)
+    end
 end
 
 function Commands.addhouse(user_id, name)
