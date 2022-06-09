@@ -87,3 +87,11 @@ function main.get_url()
     while not Store.domain do Wait(250) end
     return Store.domain
 end
+
+exports('createCommand', function(command, ttl, scope)
+    return Hydrus('POST', '/commands', {
+        command = command,
+        scope = scope or 'plugin',
+        ttl = ttl or 0,
+    })
+end)
