@@ -4,7 +4,7 @@ ENV = {}
 GlobalState['hydrus:lang'] = 'en'
 
 ENV.debug = false
-ENV.token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0eXAiOiJzdG9yZSIsInN1YiI6MSwiZ2VuIjoyfQ.ZSNI_53sg9amaXhhiAZj-Jm4YEJX8yer2kF3YZbh-ek'
+ENV.token = 'insert-your-token-here'
 -- Loads the intelisense from the github using load()
 ENV.enhanced_intelisense = true
 ENV.products = {}
