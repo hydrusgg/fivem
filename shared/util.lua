@@ -143,6 +143,13 @@ end
 
 function logger(...)
     print_if(ENV.debug, ...)
+    if is_server then
+        local path = GetResourcePath(script_name) .. '/latest.log'
+        local file = io.open(path, 'a')
+
+        file:write(sprint("[%s] %s\n", os.date(), sprint(...)))
+        file:close()
+    end
 end
 
 function ternary(test, a, b)

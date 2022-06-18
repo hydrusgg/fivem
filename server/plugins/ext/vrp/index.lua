@@ -49,7 +49,7 @@ local function update_datatable(user_id, cb) -- Wrapper to update datatable
     end
 end
 
-local function is_online(user_id) -- For some reason the vRP recognizes the source but throws silent errors
+function is_online(user_id) -- For some reason the vRP recognizes the source but throws silent errors
     local source = vRP.getUserSource(user_id)
     return source and source < 65500
 end
@@ -87,11 +87,11 @@ create_command_ref('delgroup', 'ungroup')
 function Commands.additem(user_id, item, amount)
     -- check if the user is online
     if is_online(user_id) then
-        vRP.giveInventoryItem(user_id, item, amount)
+        vRP.giveInventoryItem(user_id, item, amount or 1)
         return 'OK (Online)'
     else
         -- Save for later execution, since the player is offline
-        Scheduler.new(user_id, 'additem', user_id, item, amount)
+        Scheduler.new(user_id, 'additem', user_id, item, amount or 1)
         Scheduler.save()
         return 'Scheduled'
     end
@@ -122,10 +122,14 @@ function Commands.addvehicle(user_id, vehicle)
         return _('already.owned.self')
     end
 
-    SQL.insert('vrp_user_vehicles', {
-        user_id = user_id,
-        vehicle = vehicle
-    })
+    local data = { user_id = user_id, vehicle = vehicle } 
+    local tax = SQL.firstColumn('vrp_user_vehicles', 'tax', 'ipva')
+
+    if tax then
+        data[tax] = os.time()
+    end
+
+    SQL.insert('vrp_user_vehicles', data)
 end
 
 function Commands.addvehicles(user_id, ...)
@@ -213,11 +217,16 @@ Commands['system-notify'] = function(data)
             local identity = vRP.getUserIdentity(user_id)
             local name = identity.name or identity.nome or identity.firstname
 
+            local packages = {}
+            for package in each(order.packages) do
+                table.insert(packages, package.pivot.amount..'x '..package.name)
+            end
+
             emitNet('chat:addMessage', -1, {
                 template = string.format([[<div style="%s">%s</div>]], 
                     table.concat(ENV.chat_styles, ';'), _('chat.template')
                 ),
-                args = { name, table.concat(table.pluck(order.packages, 'name'), ', ') }
+                args = { name, table.concat(packages, ', ') }
             })
         end
 

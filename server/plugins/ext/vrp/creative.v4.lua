@@ -48,11 +48,13 @@ function Commands.addvehicle(user_id, vehicle)
         return _('already.owned.self')
     end
 
-    SQL.insert('summerz_vehicles', {
-        user_id = user_id,
-        vehicle = vehicle,
-        plate = generate_plate(),
-    })
+    local data = { user_id = user_id, vehicle = vehicle, plate = generate_plate() }
+    local tax = SQL.firstColumn('summerz_vehicles', 'tax', 'ipva')
+    if tax then
+        data[tax] = os.time()
+    end
+
+    SQL.insert('summerz_vehicles', data)
 end
 
 function Commands.delvehicle(user_id, vehicle)

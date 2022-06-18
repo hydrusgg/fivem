@@ -141,7 +141,7 @@ function scope.addVehicleProduct(data)
                 options = scope.compile_vehicles(data.vehicles)
             }
         },
-        type = 'vehicle',
+        type = ternary(ENV.testdrive == false, nil, 'vehicle'),
         days = data.days,
         is_allowed = vehicle_is_allowed,
         execute = vehicle_execute
