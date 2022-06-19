@@ -41,10 +41,12 @@ function SQL.hasColumn(table, column)
     if not SQL.tables[table] then
         return false
     elseif not SQL.columns[table] then
-        SQL.columns = _G.table.reverse(SQL([[
+        local rs = SQL([[
             SELECT column_name AS name FROM information_schema.columns WHERE 
             table_schema = DATABASE() AND table_name=?
-        ]], { table }))
+        ]], { table })
+        local columns = _G.table.pluck(rs, 'name')
+        SQL.columns[table] = _G.table.reverse(columns)
     end
     return SQL.columns[table][column] ~= nil
 end
