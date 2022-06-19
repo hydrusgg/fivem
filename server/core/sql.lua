@@ -41,7 +41,7 @@ function SQL.hasColumn(table, column)
     if not SQL.tables[table] then
         return false
     elseif not SQL.columns[table] then
-        SQL.columns = table.reverse(SQL([[
+        SQL.columns = _G.table.reverse(SQL([[
             SELECT column_name AS name FROM information_schema.columns WHERE 
             table_schema = DATABASE() AND table_name=?
         ]], { table }))
