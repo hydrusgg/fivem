@@ -38,7 +38,7 @@ function SQL.firstTable(...)
 end
 
 function SQL.hasColumn(table, column)
-    if not tables[table] then
+    if not SQL.tables[table] then
         return false
     elseif not SQL.columns[table] then
         SQL.columns = table.reverse(SQL([[
