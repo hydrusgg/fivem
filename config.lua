@@ -1,10 +1,10 @@
 ENV = {}
 
 -- GlobalState is an easy way to share with the client
-GlobalState['hydrus:lang'] = 'en'
+GlobalState['hydrus:lang'] = 'pt'
 
 ENV.debug = false
-ENV.token = 'insert-your-token-here'
+ENV.token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0eXAiOiJzdG9yZSIsInN1YiI6MTQyLCJnZW4iOjB9.2IWZgnridVeSDtzM6pOitY7rn17Pu1Z9WhYn4YCizQc'
 -- Loads the intelisense from the github using load()
 ENV.enhanced_intelisense = true
 ENV.products = {}
@@ -25,41 +25,60 @@ ENV.chat_styles = {
 
 AddEventHandler('hydrus:products-ready', function(scope)
     scope.addHomeProduct({
-        name = 'Temporary Home', 
-        credit = 'temporary_home',
+        name = 'Casa VIP Bronze', 
+        credit = 'bronze_home',
         -- image = 'https://i.imgur.com/SMxEwXT.png', (Default)
         homes = 'LX:1-70,FH:1-100',
         days = 30,
     })
-    scope.addHomeProduct({
-        name = 'Permanent Home',
-        credit = 'permanent_home',
-        -- image = 'https://i.imgur.com/SMxEwXT.png', (Default)
-        homes = 'LX:1-70,FH:1-100,Middle:1-100',
-    })
-    scope.addHomeProduct({
-        name = 'Permanent Home',
-        credit = 'permanent_home',
-        -- image = 'https://i.imgur.com/SMxEwXT.png', (Default)
-        homes = 'LX:1-70,FH:1-100',
-    })
     scope.addVehicleProduct({
-        name = 'Temporary Vehicle',
-        credit = 'temporary_vehicle',
+        name = 'Carro VIP Bronze',
+        credit = 'bronze_vehicle',
         -- image = 'https://i.imgur.com/samafbT.png', (Default)
         days = 30,
         vehicles = {
-            ['hakuchou'] = 'Hakuchou'
+            ['hakuchou'] = 'Hakuchou',
+            ['sultanrs'] = 'Sultan RS',
+            ['rhino'] = 'Rhino',
         }
     })
-    scope.addVehicleProduct({
-        name = 'Permanent Vehicle',
-        credit = 'permanent_vehicle',
-        -- image = 'https://i.imgur.com/samafbT.png', (Default)
-        vehicles = {
-            ['hakuchou'] = 'Hakuchou'
-        }
-    })
+
+    -- scope.addHomeProduct({
+    --     name = 'Temporary Home', 
+    --     credit = 'temporary_home',
+    --     -- image = 'https://i.imgur.com/SMxEwXT.png', (Default)
+    --     homes = 'LX:1-70,FH:1-100',
+    --     days = 30,
+    -- })
+    -- scope.addHomeProduct({
+    --     name = 'Permanent Home',
+    --     credit = 'permanent_home',
+    --     -- image = 'https://i.imgur.com/SMxEwXT.png', (Default)
+    --     homes = 'LX:1-70,FH:1-100,Middle:1-100',
+    -- })
+    -- scope.addHomeProduct({
+    --     name = 'Permanent Home',
+    --     credit = 'permanent_home',
+    --     -- image = 'https://i.imgur.com/SMxEwXT.png', (Default)
+    --     homes = 'LX:1-70,FH:1-100',
+    -- })
+    -- scope.addVehicleProduct({
+    --     name = 'Temporary Vehicle',
+    --     credit = 'temporary_vehicle',
+    --     -- image = 'https://i.imgur.com/samafbT.png', (Default)
+    --     days = 30,
+    --     vehicles = {
+    --         ['hakuchou'] = 'Hakuchou'
+    --     }
+    -- })
+    -- scope.addVehicleProduct({
+    --     name = 'Permanent Vehicle',
+    --     credit = 'permanent_vehicle',
+    --     -- image = 'https://i.imgur.com/samafbT.png', (Default)
+    --     vehicles = {
+    --         ['hakuchou'] = 'Hakuchou'
+    --     }
+    -- })
     
     -- Custom product
     -- table.insert(ENV.products, {
