@@ -76,7 +76,7 @@ function Commands.ungroup(user_id, group)
     else
         update_datatable(user_id, function(d)
             if d.groups then
-                d.groups[d] = nil
+                d.groups[group] = nil
             end
         end)
         return 'OK (Offline)'
