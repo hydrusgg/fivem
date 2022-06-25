@@ -13,6 +13,10 @@ function main.popup(...)
     SendNUIMessage({ 'add_popup', ... })
 end
 
+RegisterNetEvent('hydrus:popup', function(name, image_url)
+    SendNUIMessage({ 'add_popup', name, image_url })
+end)
+
 function main.open_url(url)
     SendNUIMessage({ 'open_url', url })
 end

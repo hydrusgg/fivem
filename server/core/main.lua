@@ -89,6 +89,9 @@ function main.get_url()
 end
 
 exports('createCommand', function(command, ttl, scope)
+    if type(command) == 'table' then
+        command = table.concat(command, ' ')
+    end
     return Hydrus('POST', '/commands', {
         command = command,
         scope = scope or 'plugin',
