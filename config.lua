@@ -22,6 +22,9 @@ ENV.chat_styles = {
     'justify-content: center',
     'font-weight: bold',
 }
+-- Styles for the /vip command
+ENV.vip_styles = ENV.chat_styles
+ENV.vip_command = 'vip'
 
 AddEventHandler('hydrus:products-ready', function(scope)
     scope.addHomeProduct({

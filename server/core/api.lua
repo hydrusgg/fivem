@@ -1,3 +1,7 @@
+local function await(self)
+    return table.unpack(Citizen.Await(self))
+end
+
 function http_request(url, method, data, headers)
     data = data or ''
     headers = headers or {}
@@ -14,7 +18,9 @@ function http_request(url, method, data, headers)
         p:resolve({ status, parsed or data })
     end, method, data, headers)
 
-    return table.unpack(Citizen.Await(p))
+    p.await = await
+
+    return p
 end
 
 local function mix_path(base, path)
@@ -41,6 +47,13 @@ function API(base_url, base_headers)
     return function(method, url, data, headers)
         local path = mix_path(base_url, url)
         local mixed = mix_headers(base_headers, headers)
-        return http_request(path, method:upper(), data, mixed)
+
+        local is_async = method:match('async:')
+        local res = http_request(path, method:gsub('async:', ''):upper(), data, mixed)
+
+        if is_async then
+            return res
+        end
+        return res:await()
     end
 end

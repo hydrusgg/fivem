@@ -25,7 +25,7 @@ CreateThread(function()
   end
 
   if ENV.enhanced_intelisense then
-    local status, body = http_request('https://raw.githubusercontent.com/hydrusgg/fivem/master/server/enhanced/intelisense.lua', 'GET')
+    local status, body = http_request('https://raw.githubusercontent.com/hydrusgg/fivem/master/server/enhanced/intelisense.lua', 'GET'):await()
 
     if status ~= 200 then
         printf('Failed to stream the intelisense from github, status: %d', status)

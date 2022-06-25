@@ -38,6 +38,9 @@ LANG = {
         ['notify.footer'] = 'Type /store to redeem',
 
         ['chat.template'] = '{0} just reedemed {1}',
+        ['vip.template.group'] = 'Your group {0} expires at {1}',
+        ['vip.template.house'] = 'Your residence {0} expires at {1}',
+        ['vip.template.vehicle'] = 'Your vehicle {0} expires at {1}',
     },
     ['pt'] = {
         ['error'] = 'Um erro ocorreu: :error',
@@ -72,6 +75,9 @@ LANG = {
         ['notify.footer'] = 'Digite /store para resgatar',
 
         ['chat.template'] = '{0} comprou {1}',
+        ['vip.template.group'] = 'Seu VIP {0} expira em {1}',
+        ['vip.template.house'] = 'Sua residência {0} expira em {1}',
+        ['vip.template.vehicle'] = 'Seu veículo {0} expira em {1}',
     }
 }
 

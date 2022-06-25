@@ -60,7 +60,7 @@ end)
 exports('findProduct', function(id)
     local status, data = http_request('https://api.hydrus.gg/shopping/packages/'..id, 'GET', nil, {
         ['x-hydrus-domain'] = Store.domain
-    })
+    }):await()
 
     throw_if(status ~= 200, 'Product not found')
     return data
