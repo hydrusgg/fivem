@@ -4,10 +4,28 @@
 --  or something that has multiple choices
 --
 --  Very often vRP needs this implementation to sell houses (vrp_homes_permissions).
---  Here, we are going to use LoadResourceFile for quick implementation and compatibility
---  you can adapt this to vRP.getUData
+--  you can adapt this to vRP.getUData instead of using the provided database table
 -------------------------------------------------------------------------------------------
-local memcache = json.decode(LoadResourceFile(GetCurrentResourceName(), 'database/credits.json') or '{}')
+AddEventHandler('hydrus:database-ready', function()
+    if not SQL.hasTable('hydrus_credits') then
+        SQL([[CREATE TABLE hydrus_credits (
+            player_id VARCHAR(100) NOT NULL,
+            name VARCHAR(100) NOT NULL,
+            amount INT DEFAULT 0,
+            PRIMARY KEY(player_id, name)
+        )]])
+
+        local memcache = json.decode(LoadResourceFile(script_name, 'database/credits.json') or '{}')
+
+        for player_id, credits in pairs(memcache) do
+            for name, amount in pairs(credits) do
+                SQL.replace('hydrus_credits', { player_id=player_id, name=name, amount=amount })
+            end
+        end
+
+        SaveResourceFile(script_name, 'database/credits.json', '{}', -1)
+    end
+end)
 
 -- At the moment, only vRP is supported
 local function to_child(source)
@@ -20,28 +38,28 @@ local function from_child(child)
 end
 
 local function get_credit(child, name)
-    child = tostring(child)
-    return optional(memcache, child, name) or 0
+    local rows = SQL('SELECT amount FROM hydrus_credits WHERE player_id=? AND name=?', { child, name })
+    return optional(rows, 1, 'amount') or 0
 end
 
 local function get_credits(child, key)
-    if key then
-        return get_credit(child)[key] or 0
+    local all = {}
+    local rows = SQL('SELECT name,amount FROM hydrus_credits WHERE player_id=?', { child })
+
+    for row in each(rows) do
+        all[row.name] = row.amount
     end
-    child = tostring(child)
-    return memcache[child] or {}
+
+    return all
 end
 
 local function add_credit(child, name, amount)
     amount = amount or 1
-    child = tostring(child)
-    local credits = memcache[child] or {}
-    local sum = (credits[name] or 0) + amount
+    SQL([[
+        INSERT INTO hydrus_credits (player_id, name, amount) VALUES (?,?,?)
+        ON DUPLICATE KEY UPDATE amount=amount+?
+    ]], { child, name, amount, amount })
 
-    credits[name] = ternary(sum > 0, sum, nil)
-    memcache[child] = ternary(table.empty(credits), nil, credits)
-
-    SaveResourceFile(GetCurrentResourceName(), 'database/credits.json', json.encode(memcache), -1)
     notify_credits(child, from_child(child))
 end
 
@@ -123,7 +141,7 @@ function main.redeem(source, index, form)
         local credit, price = table.unpack(product.consume)
 
         local child = to_child(source)
-        assert(get_credits(child, credit) >= price, _('credits.insufficient'))
+        assert(get_credit(child, credit) >= price, _('credits.insufficient'))
 
         sub_credit(child, credit, price)
         local ok, retval = pcall(product.execute, product, source, form)

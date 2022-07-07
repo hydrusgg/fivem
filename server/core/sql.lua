@@ -89,7 +89,7 @@ function SQL.escape(seq)
     return string.format('`%s`', safe)
 end
 
-function SQL.insert(table_name, data)
+function SQL.insert(table_name, data, operation)
     local columns = {}
     local params = {}
 
@@ -105,7 +105,11 @@ function SQL.insert(table_name, data)
 
     local marks = (',?'):rep(#columns):sub(2)
 
-    local code = string.format("INSERT INTO %s (%s) VALUES (%s)", SQL.escape(context.table), table.concat(columns, ','), marks)
+    local code = string.format("%s INTO %s (%s) VALUES (%s)", operation or 'INSERT', SQL.escape(context.table), table.concat(columns, ','), marks)
 
     return SQL(code, params)
+end
+
+function SQL.replace(table_name, data)
+    return SQL.insert(table_name, data, 'REPLACE')
 end

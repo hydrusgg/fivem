@@ -9,6 +9,8 @@ CreateThread(function()
   tables = table.reverse(tables)
   SQL.tables = tables
 
+  emit('hydrus:database-ready')
+
   if GetResourceState('vrp') == 'started' then
     load_extension('vrp/index.lua')
     print(_('framework.detected', { name = 'vRP' }))

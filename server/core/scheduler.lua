@@ -1,50 +1,69 @@
 -------------------------------------------------------------------------------------------
 --  The scheduler is used to deliver something that requires complex logic when the player
---  is offline, so we just wait until the player is online again, filtering by the identifier
---  and deleting by a random generated uuid
+--  is offline, so we just wait until the player is online again, filtering by the player_id
+--  and deleting by an auto increment id
 -------------------------------------------------------------------------------------------
 
 local memcache = json.decode(LoadResourceFile(script_name, 'database/scheduler.json') or '{}')
 
-local function uuid()
-    local template ='xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
-    return string.gsub(template, '[xy]', function (c)
-        local v = (c == 'x') and math.random(0, 0xf) or math.random(8, 0xb)
-        return string.format('%x', v)
-    end)
-end
+AddEventHandler('hydrus:database-ready', function()
+    if not SQL.hasTable('hydrus_scheduler') then
+        SQL([[CREATE TABLE hydrus_scheduler (
+            id BIGINT NOT NULL AUTO_INCREMENT,
+            player_id VARCHAR(100) NOT NULL,
+            command VARCHAR(100) NOT NULL,
+            args VARCHAR(4096) NOT NULL,
+            execute_at BIGINT DEFAULT 0,
+            PRIMARY KEY(id)
+        )]])
+        SQL('CREATE INDEX player_index ON hydrus_scheduler(player_id)')
+
+        local memcache = json.decode(LoadResourceFile(script_name, 'database/scheduler.json') or '{}')
+
+        for item in each(memcache) do
+            if item.identifier then
+                SQL.insert('hydrus_scheduler', {
+                    player_id = item.identifier,
+                    command = item.command,
+                    args = json.encode(item.args),
+                })
+            end
+        end
+
+        SaveResourceFile(script_name, 'database/scheduler.json', '{}', -1)
+    end
+end)
 
 Scheduler = {}
 
 function Scheduler.new(identifier, command, ...)
-    table.insert(memcache, {
-        id = uuid(),
-        identifier = identifier,
+    SQL.insert('hydrus_scheduler', {
+        player_id = identifier,
         command = command,
-        args = { ... }
+        args = json.encode({ ... }),
     })
 end
 
 function Scheduler.find(identifier)
-    local r = {}
-
-    for i, data in ipairs(memcache) do
-        if data.identifier == identifier then
-            table.insert(r, data)
-        end
-    end
-
-    return r
+    local rows = SQL('SELECT * FROM hydrus_scheduler WHERE player_id=? AND execute_at<=?', { identifier, os.time() })
+    return table.map(rows, function(item)
+        item.args = json.decode(item.args)
+        return item
+    end)
 end
 
 function Scheduler.delete(id)
-    for i=#memcache,1,-1 do
-        if memcache[i].id == id then
-            table.remove(memcache, i)
-        end
-    end
+    SQL('DELETE FROM hydrus_scheduler WHERE id=?', { id })
 end
 
-function Scheduler.save()
-    SaveResourceFile(script_name, 'database/scheduler.json', json.encode(memcache), -1)
-end
+exports('schedule', function(player_id, command, args, ttl)
+    if type(command) == 'table' then
+        command = table.concat(command, ' ')
+    end
+    return SQL.insert('hydrus_scheduler', {
+        player_id = player_id,
+        command = command,
+        args = json.encode(args),
+        execute_at = ttl and (os.time() + ttl) or 0,
+    })
+end)

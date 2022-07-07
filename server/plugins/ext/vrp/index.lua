@@ -92,7 +92,6 @@ function Commands.additem(user_id, item, amount)
     else
         -- Save for later execution, since the player is offline
         Scheduler.new(user_id, 'additem', user_id, item, amount or 1)
-        Scheduler.save()
         return 'Scheduled'
     end
 end
@@ -204,7 +203,6 @@ Commands['system-notify'] = function(data)
     if not source then
         -- The player is offline, try again later...
         Scheduler.new(user_id, 'system-notify', data)
-        Scheduler.save()
     else
         local status,order = Hydrus('GET', '/orders/'..payload.order_id)
 
@@ -249,7 +247,6 @@ AddEventHandler('vRP:playerSpawn', function(user_id, source)
             print_if(not ok, 'Error on schedule: %s %s\n%s', data.command, json.encode(data.args), err)
             Scheduler.delete(data.id)
         end
-        Scheduler.save()
     end
     pcall(notify_credits, tostring(user_id), source)
 end)
