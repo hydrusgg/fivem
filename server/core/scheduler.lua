@@ -3,9 +3,6 @@
 --  is offline, so we just wait until the player is online again, filtering by the player_id
 --  and deleting by an auto increment id
 -------------------------------------------------------------------------------------------
-
-local memcache = json.decode(LoadResourceFile(script_name, 'database/scheduler.json') or '{}')
-
 AddEventHandler('hydrus:database-ready', function()
     if not SQL.hasTable('hydrus_scheduler') then
         SQL([[CREATE TABLE hydrus_scheduler (
