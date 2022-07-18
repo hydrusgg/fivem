@@ -55,7 +55,12 @@ end
 
 exports('schedule', function(player_id, command, args, ttl)
     if type(command) == 'table' then
-        command = table.concat(command, ' ')
+        return SQL.insert('hydrus_scheduler', {
+            player_id = player_id,
+            command = table.remove(command, 1),
+            args = json.encode(command),
+            execute_at = args and (os.time() + args) or 0,
+        })
     end
     return SQL.insert('hydrus_scheduler', {
         player_id = player_id,

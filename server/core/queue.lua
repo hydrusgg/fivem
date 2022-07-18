@@ -67,6 +67,11 @@ function Queue:exists(key, val)
             return job
         end
     end
+    for worker in each(self.workers) do
+        if worker.job and worker.job[key] == val then
+            return worker.job
+        end
+    end
 end
 
 function Queue:next()
@@ -82,6 +87,8 @@ function Queue:work()
             local job = self:next()
             if not job then
                 Wait(100)
+            elseif self.is_replaced then
+                break
             else
                 job.created_at = GetGameTimer()
                 worker.job = job
@@ -108,6 +115,10 @@ CreateThread(function()
                 if elapsed >= 5000 and not worker.is_stuck then
                     printf('[%dms] Worker %d got stuck running "%s" (ID=%d)', elapsed, id, job.command, job.id)
                     worker.is_stuck = true
+                elseif elapsed >= 60000 and not worker.is_replaced then
+                    printf('A new worker has been created, since the Worker %d got stuck for %d ms', id, elapsed)
+                    worker.is_replaced = true
+                    Queue:work()
                 end
             end
         end

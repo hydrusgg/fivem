@@ -129,8 +129,20 @@ onNet = RegisterNetEvent
 script_name = GetCurrentResourceName()
 local is_server = IsDuplicityVersion()
 
-function printf(s, ...)
-    print(s:format(...))
+local function append_log(text)
+    local path = GetResourcePath(script_name) .. '/latest.log'
+    local file = io.open(path, 'a')
+
+    file:write(sprint("[%s] %s\n", os.date("%d %b %H:%m:%S"), text))
+    file:close()
+end
+
+function printf(...)
+    local text = sprint(...)
+    print(text)
+    if is_server then
+        append_log(text)
+    end
 end
 
 sprint = string.format
@@ -142,13 +154,12 @@ function print_if(bool, ...)
 end
 
 function logger(...)
-    print_if(ENV.debug, ...)
+    local text = sprint(...)
+    if ENV.debug then
+        print(text)
+    end
     if is_server then
-        local path = GetResourcePath(script_name) .. '/latest.log'
-        local file = io.open(path, 'a')
-
-        file:write(sprint("[%s] %s\n", os.date(), sprint(...)))
-        file:close()
+        append_log(text)
     end
 end
 

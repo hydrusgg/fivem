@@ -141,12 +141,15 @@ function main.redeem(source, index, form)
         local credit, price = table.unpack(product.consume)
 
         local child = to_child(source)
-        assert(get_credit(child, credit) >= price, _('credits.insufficient'))
+        local balance = get_credit(child, credit)
+        assert(balance >= price, _('credits.insufficient'))
 
         sub_credit(child, credit, price)
+        logger('%s reedemed credit "%s" Balance: %d -> %d [%s]', child, product.name, balance, balance-price, credit)
         local ok, retval = pcall(product.execute, product, source, form)
         if not ok then
             add_credit(child, credit, price)
+            logger('%s was chargebacked due an error %d [%s]', price, credit)
             printf(_('error', { error = retval }))
             error(_('contact.support'))
         end

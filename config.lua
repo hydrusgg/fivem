@@ -38,13 +38,7 @@ AddEventHandler('hydrus:products-ready', function(scope)
         name = 'Permanent Home',
         credit = 'permanent_home',
         -- image = 'https://i.imgur.com/SMxEwXT.png', (Default)
-        homes = 'LX:1-70,FH:1-100,Middle:1-100',
-    })
-    scope.addHomeProduct({
-        name = 'Permanent Home',
-        credit = 'permanent_home',
-        -- image = 'https://i.imgur.com/SMxEwXT.png', (Default)
-        homes = 'LX:1-70,FH:1-100',
+        homes = 'LX:1-70,FH:1-100,Middle:1-100-3',
     })
     scope.addVehicleProduct({
         name = 'Temporary Vehicle',
@@ -55,14 +49,14 @@ AddEventHandler('hydrus:products-ready', function(scope)
             ['hakuchou'] = 'Hakuchou'
         }
     })
-    -- scope.addVehicleProduct({
-    --     name = 'Permanent Vehicle',
-    --     credit = 'permanent_vehicle',
-    --     -- image = 'https://i.imgur.com/samafbT.png', (Default)
-    --     vehicles = {
-    --         ['hakuchou'] = 'Hakuchou'
-    --     }
-    -- })
+    scope.addVehicleProduct({
+        name = 'Permanent Vehicle',
+        credit = 'permanent_vehicle',
+        -- image = 'https://i.imgur.com/samafbT.png', (Default)
+        vehicles = {
+            ['hakuchou'] = 'Hakuchou'
+        }
+    })
     
     -- Custom product
     -- table.insert(ENV.products, {
