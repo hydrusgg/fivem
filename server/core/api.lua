@@ -15,7 +15,7 @@ function http_request(url, method, data, headers)
 
     PerformHttpRequest(url, function(status, data, headers, errorData)
         local parsed = json.decode(data or errorData or '')
-        p:resolve({ status, parsed or data })
+        p:resolve({ status, parsed or data, errorData })
     end, method, data, headers)
 
     p.await = await

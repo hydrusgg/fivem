@@ -33,7 +33,7 @@ local function handle_command(id, raw)
 
     local tries = 0
     while true do
-        local status, body = Hydrus('PATCH', 'commands/'..id, body)
+        local status, body, err = Hydrus('PATCH', 'commands/'..id, body)
         if status == 0 then
             if tries == 0 then
                 print('Failed to connect to the api endpoint, the script will try again')
@@ -43,7 +43,7 @@ local function handle_command(id, raw)
         elseif status ~= 200 and status ~= 404 then
             printf('Failed to UPDATE the command {ID=%d, STATUS=%d} the script will try again in 10 seconds', id, status)
             if status >= 500 then
-                logger('Status %d -> %s', status, json.encode(body))
+                logger('Status %d -> %s', status, err)
             end
             Wait(10e3)
         else
