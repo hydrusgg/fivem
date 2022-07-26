@@ -47,7 +47,7 @@ local function handle_command(id, raw)
             end
             Wait(10e3)
         else
-            return body
+            return body or { status = 'missing', message = 'Model not found (ignored)' }
         end
     end
 end

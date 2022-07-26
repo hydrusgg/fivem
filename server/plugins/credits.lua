@@ -116,12 +116,12 @@ function main.redeem(source, index, form)
     return lock(source, function()
         local product = assert(ENV.products[index], 'Product not found')
 
-        for _, field in ipairs(product.form or {}) do
+        for field in each(product.form or {}) do
             local selected = form[field.name]
-            assert(selected ~= nil, 'The '..field.label..' is mandatory')
+            assert(selected ~= nil, _('field.mandatory', { field = field.label }))
             if field.pattern then
-                local r = '^'..product.pattern:gsub('0', '%%d'):gsub('-', '%%-')..'$'
-                assert(selected:match(r), 'Invalid format, follow the pattern '..product.pattern)
+                local r = '^'..field.pattern:gsub('0', '%%d'):gsub('-', '%%-')..'$'
+                assert(selected:match(r), _('field.pattern.invalid', { pattern = field.pattern }))
             elseif field.options then
                 local opt
                 for _, option in pairs(field.options) do
@@ -153,6 +153,7 @@ function main.redeem(source, index, form)
             printf(_('error', { error = retval }))
             error(_('contact.support'))
         end
+        emit('hydrus:redeem', child, product, form)
         return retval
     end)
 end
@@ -185,7 +186,7 @@ end
 ------------------------------------------------
 -- Create all the products
 ------------------------------------------------
-load_extension('products.lua')
+load_extension('products')
 ------------------------------------------------
 -- Command implementation
 ------------------------------------------------

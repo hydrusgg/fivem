@@ -5,6 +5,9 @@ Store = {}
 
 CreateThread(function()
     local ws, connected, seq = nil, false, 0
+    local pid = math.abs(GetHashKey(GetResourcePath(script_name)))
+
+    logger('PID: %s', pid)
 
     local function push(job)
         if Queue:exists('id', job.id) then
@@ -29,10 +32,10 @@ CreateThread(function()
             seq = seq + 1
             if seq >= 5 then
                 print(_('connection.outage'))
-                Wait(60000)
+                Wait(60e3)
                 seq = 0
             else
-                Wait(5000)
+                Wait(5e3)
             end
             ws.reconnect()
         elseif event == '$close' and connected then
@@ -47,11 +50,14 @@ CreateThread(function()
         end
     end
 
-    Wait(3000) -- Avoid conflicts with already connected
     while wait_before_intelisense do
         Wait(100)
     end
-    ws = exports[script_name]:createWebSocket('wss://rtc.hydrus.gg/'..ENV.token..'/plugin', listener)
+    ws = exports[script_name]:createWebSocket('wss://rtc.hydrus.gg', {
+        ['authorization'] = ENV.token,
+        ['x-scope'] = 'plugin',
+        ['x-pid'] = pid,
+    }, listener)
 
     while true do
         Wait(60e3)
@@ -61,26 +67,21 @@ CreateThread(function()
     end
 end)
 
+local extensions = {}
+
+function create_extension(name, moduleFn)
+    extensions[name] = moduleFn
+end
+
 function load_extension(name)
-    local file = LoadResourceFile(script_name, 'server/plugins/ext/'..name)
-
-    if not file then
-        print(_('extension.not_found', { name=name }))
-        return false
+    local old = extensions[name]
+    if type(old) == 'function' then
+        extensions[name] = old() or {}
+        return extensions[name]
+    elseif old ~= nil then
+        return old
     end
-
-    local func, err = load(file)
-
-    if not func then
-        print(_('extension.error', { name=name, error=err }))
-        return false
-    end
-
-    local ok, err = pcall(load(file))
-    if not ok then
-        print(_('extension.error', { name=name, error=err }))
-    end
-    return ok, err
+    error(_('extension.not_found', { name=name }))
 end
 
 function main.get_url()

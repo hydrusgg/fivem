@@ -12,16 +12,16 @@ CreateThread(function()
   emit('hydrus:database-ready')
 
   if GetResourceState('vrp') == 'started' then
-    load_extension('vrp/index.lua')
+    load_extension('vrp')
     print(_('framework.detected', { name = 'vRP' }))
   end
 
   if tables.vrp_infos and tables.vrp_permissions then
-    if load_extension('vrp/creative.v3.lua') then
+    if load_extension('vrp/creative3') then
       logger('Creative v3 (by summerz) template was injected')
     end
   elseif tables.summerz_characters then
-    if load_extension('vrp/creative.v4.lua') then
+    if load_extension('vrp/creative4') then
       logger('Creative v4 (by summerz) template was injected')
     end
   end

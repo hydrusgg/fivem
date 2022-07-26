@@ -1,4 +1,4 @@
-exports('createWebSocket', (url, listener) => {
+exports('createWebSocket', (url, headers, listener) => {
   let handle
 
   const instance = {
@@ -18,7 +18,7 @@ exports('createWebSocket', (url, listener) => {
       if (handle) {
         handle.close()
       }
-      handle = new WebSocket(url)
+      handle = new WebSocket(url, { headers })
       handle.onmessage = ({ data }) => {
         const { event, payload } = JSON.parse(data.toString('utf8'))
         listener(event, payload)

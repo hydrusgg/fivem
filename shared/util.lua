@@ -122,6 +122,7 @@ end
 -- Copying JS behavior (it's way easier)
 emit = TriggerEvent
 emitNet = TriggerClientEvent or TriggerServerEvent
+on = AddEventHandler
 onNet = RegisterNetEvent
 
 -- Tunnel (Just like vRP)

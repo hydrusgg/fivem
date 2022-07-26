@@ -66,6 +66,7 @@ AddEventHandler('hydrus:products-ready', function(scope)
     --     form = {
     --         {
     --             label = _('insert.phone'),
+    --             placeholder = '000-000',
     --             name = 'phone',
     --             pattern = '000-000'
     --         }

@@ -7,13 +7,14 @@ shared_scripts {
     'shared/*'
 }
 
-version '1.6.1'
+version '1.7.0'
 
 lua54 'yes'
 
 server_scripts {
     'server/connection/*',
     'server/core/*',
+    'server/ext/**/*', -- Lazy load all extensions
     'server/*', -- inject essential code
     'server/plugins/*', -- plugins always in last
 }
