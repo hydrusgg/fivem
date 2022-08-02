@@ -11,6 +11,10 @@ if type(ENV.vip_command) == 'string' then
         if vRP then
             local user_id = vRP.getUserId(source)
 
+            if not user_id then
+                return
+            end
+
             local namespace = { 'group', 'house', 'vehicle' }
             local requests = Citizen.Await(promise.all({
                 Hydrus('async:GET', route('ungroup', user_id)),

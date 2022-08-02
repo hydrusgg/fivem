@@ -145,11 +145,11 @@ function main.redeem(source, index, form)
         assert(balance >= price, _('credits.insufficient'))
 
         sub_credit(child, credit, price)
-        logger('%s reedemed credit "%s" Balance: %d -> %d [%s]', child, product.name, balance, balance-price, credit)
+        logger('%s reedemed credit "%s" Balance: %s -> %s [%s]', child, product.name, balance, balance-price, credit)
         local ok, retval = pcall(product.execute, product, source, form)
         if not ok then
             add_credit(child, credit, price)
-            logger('%s was chargebacked due an error %d [%s]', price, credit)
+            logger('%s was chargebacked due an error %s [%s]', price, credit)
             printf(_('error', { error = retval }))
             error(_('contact.support'))
         end
