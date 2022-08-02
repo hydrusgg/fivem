@@ -165,9 +165,12 @@ create_extension('vrp', function()
             tax = os.time(),
         })
     end
-
+    
     function Commands.delhouse(user_id, name)
-        SQL('DELETE FROM vrp_homes_permissions WHERE user_id=? AND home=?', { user_id, name })
+        local exists = SQL('SELECT 1 FROM vrp_homes_permissions WHERE user_id=? AND home=?', { user_id, name })[1]
+        if exists then
+            SQL('DELETE FROM vrp_homes_permissions WHERE home=?', { name })
+        end
     end
 
     function Commands.changephone(user_id, phone)
