@@ -149,7 +149,7 @@ function main.redeem(source, index, form)
         local ok, retval = pcall(product.execute, product, source, form)
         if not ok then
             add_credit(child, credit, price)
-            logger('%s was chargebacked due an error %s [%s]', price, credit)
+            logger('%s was chargebacked due an error %s [%s]', child, price, credit)
             printf(_('error', { error = retval }))
             error(_('contact.support'))
         end
