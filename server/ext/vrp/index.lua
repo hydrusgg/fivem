@@ -35,6 +35,29 @@ create_extension('vrp', function()
 
     setmetatable(vRP, vRP)
 
+    Proxy = {
+        getId = vRP.getUserId,
+        getSource = vRP.getUserSource,
+    }
+
+    function vRP.generate_plate(table, column)
+        local chars = 'QWERTYUIOPASDFGHJKLZXCVBNM'
+        local nums = '0123456789'
+        
+        local plate = string.gsub(ENV.plate_format or 'DDLLLDDD', '[DL]', function(letter)
+            local all = letter == 'D' and nums or chars
+            local index = math.random(#all)
+            return all:sub(index, index)
+        end)
+    
+        -- Check if the plate already exists on the database
+        if #SQL.silent(sprint('SELECT 1 FROM %s WHERE %s=?', table, column), { plate }) > 0 then
+            return vRP.generate_plate(table, column)
+        end
+    
+        return plate
+    end
+
     ----------------------------------------------
     -- COMMANDS
     --
@@ -50,14 +73,21 @@ create_extension('vrp', function()
         end
     end
 
-    function is_online(user_id) -- For some reason the vRP recognizes the source but throws silent errors
-        local source = vRP.getUserSource(user_id)
-        return source and source < 65500
+    function is_online(user_id)
+        local source = Proxy.getSource(user_id)
+        if source then
+            return ternary(source > 65000, 'queue', true)
+        end
+        return false
     end
 
-    function Commands.group(user_id, group)
-        -- check if the user is online
-        if is_online(user_id) then
+    ensure_command('group', function(user_id, group)
+        local online = is_online(user_id)
+
+        if online == 'queue' then
+            Scheduler.new(user_id, 'group', user_id, group)
+            return 'Scheduled'
+        elseif online then
             vRP.addUserGroup(user_id, group)
             return 'OK (Online)'
         else
@@ -67,11 +97,15 @@ create_extension('vrp', function()
             end)
             return 'OK (Offline)'
         end
-    end
+    end)
 
-    function Commands.ungroup(user_id, group)
-        -- check if the user is online
-        if is_online(user_id) then
+    ensure_command('ungroup', function(user_id, group)
+        local online = is_online(user_id)
+
+        if online == 'queue' then
+            Scheduler.new(user_id, 'ungroup', user_id, group)
+            return 'Scheduled'
+        elseif online then
             vRP.removeUserGroup(user_id, group)
             return 'OK (Online)'
         else
@@ -82,12 +116,12 @@ create_extension('vrp', function()
             end)
             return 'OK (Offline)'
         end
-    end
+    end)
     create_command_ref('delgroup', 'ungroup')
 
-    function Commands.additem(user_id, item, amount)
+    ensure_command('additem', function(user_id, item, amount)
         -- check if the user is online
-        if is_online(user_id) then
+        if is_online(user_id) == true then
             vRP.giveInventoryItem(user_id, item, amount or 1)
             return 'OK (Online)'
         else
@@ -95,27 +129,30 @@ create_extension('vrp', function()
             Scheduler.new(user_id, 'additem', user_id, item, amount or 1)
             return 'Scheduled'
         end
-    end
+    end)
 
-    function Commands.additems(user_id, ...)
+    ensure_command('additems', function(user_id, ...)
         local args = { ... }
         for i = 1, #args, 2 do
             Commands.additem(user_id, args[i], args[i+1])
         end
-    end
+    end)
 
-    function Commands.addmoney(user_id, amount)
-        -- check if the user is online
-        if is_online(user_id) then
+    ensure_command('addmoney', function(user_id, amount)
+        local online = is_online(user_id)
+        if online == 'queue' then
+            Scheduler.new(user_id, 'addmoney', user_id, amount)
+            return 'Scheduled'
+        elseif online then
             vRP.giveBankMoney(user_id, amount)
             return 'OK (Online)'
         else
             SQL('UPDATE vrp_user_moneys SET bank=bank+? WHERE user_id=?', { amount, user_id })
             return 'OK (Offline)'
         end
-    end
+    end)
 
-    function Commands.addvehicle(user_id, vehicle)
+    ensure_command('addvehicle', function(user_id, vehicle)
         local old = SQL('SELECT 1 FROM vrp_user_vehicles WHERE user_id=? AND vehicle=?', { user_id, vehicle })
 
         if #old > 0 then
@@ -123,32 +160,32 @@ create_extension('vrp', function()
         end
 
         local data = { user_id = user_id, vehicle = vehicle } 
-        local tax = SQL.firstColumn('vrp_user_vehicles', 'tax', 'ipva')
+        local tax = SQL.first_column('vrp_user_vehicles', 'tax', 'ipva')
 
         if tax then
             data[tax] = os.time()
         end
 
         SQL.insert('vrp_user_vehicles', data)
-    end
+    end)
 
-    function Commands.addvehicles(user_id, ...)
+    ensure_command('addvehicles', function(user_id, ...)
         for _, spawn in ipairs({ ... }) do
             Commands.addvehicle(user_id, spawn)
         end
-    end
+    end)
 
-    function Commands.delvehicle(user_id, vehicle)
+    ensure_command('delvehicle', function(user_id, vehicle)
         SQL('DELETE FROM vrp_user_vehicles WHERE user_id=? AND vehicle=?', { user_id, vehicle })
-    end
+    end)
 
-    function Commands.delvehicles(user_id, ...)
+    ensure_command('delvehicles', function(user_id, ...)
         for _, spawn in pairs({ ... }) do
             Commands.delvehicle(user_id, spawn)
         end
-    end
+    end)
 
-    function Commands.addhouse(user_id, name)
+    ensure_command('addhouse', function(user_id, name)
         local old = SQL('SELECT user_id FROM vrp_homes_permissions WHERE owner=1 AND home=?', { name })[1]
         
         if old then
@@ -164,20 +201,20 @@ create_extension('vrp', function()
             owner = 1,
             tax = os.time(),
         })
-    end
+    end)
     
-    function Commands.delhouse(user_id, name)
+    ensure_command('delhouse', function(user_id, name)
         local exists = SQL('SELECT 1 FROM vrp_homes_permissions WHERE user_id=? AND home=?', { user_id, name })[1]
         if exists then
             SQL('DELETE FROM vrp_homes_permissions WHERE home=?', { name })
         end
-    end
+    end)
 
-    function Commands.changephone(user_id, phone)
+    ensure_command('changephone', function(user_id, phone)
         SQL('UPDATE vrp_user_identities SET phone=? WHERE user_id=?', { phone, user_id })
-    end
+    end)
 
-    function Commands.ban(user_id)
+    ensure_command('ban', function(user_id)
         vRP.setBanned(user_id, true)
 
         local source = vRP.getUserSource(user_id)
@@ -185,19 +222,19 @@ create_extension('vrp', function()
             DropPlayer(source)
             return 'OK (Online)'
         end
-    end
+    end)
 
-    function Commands.unban(user_id)
+    ensure_command('unban', function(user_id)
         vRP.setBanned(user_id, false)
-    end
+    end)
 
-    function Commands.whitelist(user_id)
+    ensure_command('whitelist', function(user_id)
         SQL('UPDATE vrp_users SET whitelisted = 1 WHERE id=?', { user_id })
-    end
+    end)
 
-    function Commands.reset_character(user_id)
+    ensure_command('reset_character', function(user_id)
         SQL('UPDATE vrp_user_data SET dvalue=0 WHERE dkey=? AND user_id=?', { 'vRP:spawnController', user_id })
-    end
+    end)
 
     Commands['system-notify'] = function(data)
         local payload = json.decode(Base64:decode(data))
@@ -238,26 +275,12 @@ create_extension('vrp', function()
         end
         return '__delete__'
     end
+    
     ------------------------------------------------------------------------
     -- SCHEDULER
     ------------------------------------------------------------------------
 
-    AddEventHandler('vRP:playerSpawn', function(user_id, source)
-        local all = Scheduler.find(user_id)
-        if #all > 0 then
-            for _, data in ipairs(all) do
-                if type(data.args) == 'table' then
-                    local func = Commands[data.command]
-                    local ok, err = pcall(func, table.unpack(data.args))
-                    print_if(not ok, 'Error on schedule: %s %s\n%s', data.command, json.encode(data.args), err)
-                    Scheduler.delete(data.id)
-                else
-                    printf('Scheduled command %d args isnt a table', data.id)
-                end
-            end
-        end
-        pcall(notify_credits, tostring(user_id), source)
-    end)
+    AddEventHandler('vRP:playerSpawn', Scheduler.batch)
 
     ------------------------------------------------------------------------
     -- Credits API

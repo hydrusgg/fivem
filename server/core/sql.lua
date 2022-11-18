@@ -23,45 +23,42 @@ SQL.drivers = {
 }
 
 SQL.tables = {}
-SQL.columns = {}
 
-function SQL.hasTable(name)
+function SQL.has_table(name)
     return SQL.tables[name] ~= nil
 end
 
-function SQL.firstTable(...)
+SQL.hasTable = SQL.has_table
+
+function SQL.first_table(...)
     for table in each({ ... }) do
-        if SQL.hasTable(table) then
+        if SQL.has_table(table) then
             return table
         end
     end
 end
 
-function SQL.hasColumn(table, column)
-    if not SQL.tables[table] then
-        return false
-    elseif not SQL.columns[table] then
-        local rs = SQL([[
-            SELECT column_name AS name FROM information_schema.columns WHERE 
-            table_schema = DATABASE() AND table_name=?
-        ]], { table })
-        local columns = _G.table.pluck(rs, 'name')
-        SQL.columns[table] = _G.table.reverse(columns)
-    end
-    return SQL.columns[table][column] ~= nil
+SQL.firstTable = SQL.first_table
+
+function SQL.has_column(table, column)
+    return SQL.tables[table] and SQL.tables[table][column]
 end
 
-function SQL.firstColumn(table, ...)
+SQL.hasColumn = SQL.has_column
+
+function SQL.first_column(table, ...)
     for column in each({ ... }) do
-        if SQL.hasColumn(table, column) then
+        if SQL.has_column(table, column) then
             return column
         end
     end
 end
 
+SQL.firstColumn = SQL.first_column
+
 local handlers = {}
 
-function SQL.onInsert(table, fn)
+function SQL.on_insert(table, fn)
     handlers[table] = fn
 end
 
@@ -74,9 +71,12 @@ for driver in each(SQL.drivers) do
 end
 
 function SQL.__call(self, sql, params)
-    if SQL.driver then
-        logger("SQL: [%s] -> %s", sql, json.encode(params))
+    logger('SQL: [%s] -> %s', sql, json.encode(params))
+    return SQL.silent(sql, params)
+end
 
+function SQL.silent(sql, params)
+    if SQL.driver then
         local p = promise.new()
         SQL.driver(p, sql, params or {})
         return Citizen.Await(p) or error('Unexpected sql result from '..script)
@@ -89,6 +89,11 @@ function SQL.escape(seq)
     return string.format('`%s`', safe)
 end
 
+function SQL.scalar(sql, params)
+    local row = SQL(sql, params)[1] or {}
+    return ({next(row)})[2]
+end
+
 function SQL.insert(table_name, data, operation)
     local columns = {}
     local params = {}
@@ -99,13 +104,15 @@ function SQL.insert(table_name, data, operation)
     end
 
     for k,v in pairs(context.data) do
-        table.insert(columns, SQL.escape(k))
-        table.insert(params, v)
+        if SQL.has_column(table_name, k) then
+            table.insert(columns, SQL.escape(k))
+            table.insert(params, v)
+        end
     end
 
     local marks = (',?'):rep(#columns):sub(2)
 
-    local code = string.format("%s INTO %s (%s) VALUES (%s)", operation or 'INSERT', SQL.escape(context.table), table.concat(columns, ','), marks)
+    local code = string.format('%s INTO %s (%s) VALUES (%s)', operation or 'INSERT', SQL.escape(context.table), table.concat(columns, ','), marks)
 
     return SQL(code, params)
 end

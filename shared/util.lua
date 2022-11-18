@@ -55,12 +55,16 @@ function table:map(cb)
 end
 
 function table:includes(o)
+    return self:indexOf(o) ~= -1
+end
+
+function table:indexOf(o)
     for i, v in pairs(self) do
         if v == o then
-            return true
+            return i
         end
     end
-    return false
+    return -1
 end
 
 function table:pluck(key)
@@ -94,6 +98,14 @@ function table:empty()
     return true
 end
 
+function bind_function(fn, ...)
+    local base = { ... }
+    return function(...)
+        local args = table.join(base, { ... })
+        return fn(table.unpack(args))
+    end
+end
+
 function each(t)
     local i = 0
     return function()
@@ -108,6 +120,11 @@ function callable(func)
             return self.call(...)
         end
     })
+end
+
+function is_callable(o)
+    local mt = getmetatable(o)
+    return type(o) == 'function' or (mt and mt.__call)
 end
 
 function optional(o, ...)
@@ -134,7 +151,7 @@ local function append_log(text)
     local path = GetResourcePath(script_name) .. '/latest.log'
     local file = io.open(path, 'a')
 
-    file:write(sprint("[%s] %s\n", os.date("%d %b %H:%m:%S"), text))
+    file:write(sprint("[%s] %s\n", os.date("%d %b %H:%M:%S"), text))
     file:close()
 end
 

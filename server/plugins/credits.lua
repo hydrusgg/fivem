@@ -7,7 +7,7 @@
 --  you can adapt this to vRP.getUData instead of using the provided database table
 -------------------------------------------------------------------------------------------
 AddEventHandler('hydrus:database-ready', function()
-    if not SQL.hasTable('hydrus_credits') then
+    if not SQL.has_table('hydrus_credits') then
         SQL([[CREATE TABLE hydrus_credits (
             player_id VARCHAR(100) NOT NULL,
             name VARCHAR(100) NOT NULL,
@@ -27,24 +27,18 @@ AddEventHandler('hydrus:database-ready', function()
     end
 end)
 
--- At the moment, only vRP is supported
-local function to_child(source)
-    return tostring(vRP.getUserId(source) or 'nil')
-end
-
--- At the moment, only vRP is supported
-local function from_child(child)
-    return vRP.getUserSource(parse_int(child))
-end
-
 local function get_credit(child, name)
-    local rows = SQL('SELECT amount FROM hydrus_credits WHERE player_id=? AND name=?', { child, name })
+    local rows = SQL.silent('SELECT amount FROM hydrus_credits WHERE player_id=? AND name=?', { child, name })
     return optional(rows, 1, 'amount') or 0
 end
 
 local function get_credits(child, key)
+    if not child then
+        return {}
+    end
+
     local all = {}
-    local rows = SQL('SELECT name,amount FROM hydrus_credits WHERE player_id=?', { child })
+    local rows = SQL.silent('SELECT name,amount FROM hydrus_credits WHERE player_id=?', { child })
 
     for row in each(rows) do
         all[row.name] = row.amount
@@ -55,12 +49,17 @@ end
 
 local function add_credit(child, name, amount)
     amount = amount or 1
-    SQL([[
-        INSERT INTO hydrus_credits (player_id, name, amount) VALUES (?,?,?)
-        ON DUPLICATE KEY UPDATE amount=amount+?
-    ]], { child, name, amount, amount })
 
-    notify_credits(child, from_child(child))
+    if amount > 0 then
+        SQL([[
+            INSERT INTO hydrus_credits (player_id, name, amount) VALUES (?,?,?)
+            ON DUPLICATE KEY UPDATE amount=amount+?
+        ]], { child, name, amount, amount })
+    elseif amount < 0 then
+        SQL('UPDATE hydrus_credits SET amount=amount-? WHERE player_id=? AND name=?', { math.abs(amount), child, name })
+    end
+
+    notify_credits(child, Proxy.getSource(child))
 end
 
 Commands.addcredit = add_credit
@@ -94,8 +93,8 @@ AddEventHandler('hydrus:products-ready', function(scope)
     Wait(10e3)
 
     for _, source in ipairs(GetPlayers()) do
-        local child = to_child(source)
-        if child ~= 'nil' then
+        local child = Proxy.getId(source)
+        if child then
             notify_credits(child, source)
         end
     end
@@ -103,9 +102,31 @@ end)
 
 local redeem_lock = {}
 
+exports('addCredit', add_credit)
+
+exports('consumeCredit', function(player_id, name, amount)
+    amount = amount or 1
+    assert(amount >= 1, 'Amount must be greater than 0')
+
+    while redeem_lock[player_id] do
+        Wait(0)
+    end
+    redeem_lock[player_id] = true
+
+    local balance = SQL.scalar('SELECT amount FROM hydrus_credits WHERE player_id=? AND name=?', { player_id, name }) or 0
+    local ok = balance >= amount
+
+    if ok then
+        SQL('UPDATE hydrus_credits SET amount=amount-? WHERE player_id=? AND name=?', { amount, player_id, name })
+    end
+
+    redeem_lock[player_id] = nil
+    return ok
+end)
+
 local function lock(source, func)
     assert(not redeem_lock[source], 'Wait your past transaction to finish')
-    
+    redeem_lock[source] = true
     local ok, retval = pcall(func)
     redeem_lock[source] = nil
     assert(ok, retval)
@@ -135,12 +156,12 @@ function main.redeem(source, index, form)
         end
 
         if product.is_allowed then
-            product:is_allowed(source, form)
+            assert(product:is_allowed(source, form), _('already.owned.someone'))
         end
 
         local credit, price = table.unpack(product.consume)
+        local child = assert(Proxy.getId(source), 'Invalid child')
 
-        local child = to_child(source)
         local balance = get_credit(child, credit)
         assert(balance >= price, _('credits.insufficient'))
 
@@ -195,7 +216,7 @@ RegisterCommand('store', function(source, args)
         return
     end
 
-    local user_credits = get_credits(to_child(source))
+    local user_credits = get_credits(Proxy.getId(source))
 
     local clone = {}
     for index,v in ipairs(ENV.products) do

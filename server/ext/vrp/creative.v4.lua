@@ -1,6 +1,10 @@
 create_extension('vrp/creative4', function()
     vRP.getUserSource = vRP.userSource
     vRP.getUserIdentity = vRP.userIdentity
+    Proxy = {
+        getId = vRP.getUserId,
+        getSource = vRP.userSource,
+    }
 
     local function update_datatable(user_id, cb) -- Wrapper to update datatable
         local dt = json.decode(vRP.userData(user_id, 'Datatable'))
@@ -12,57 +16,39 @@ create_extension('vrp/creative4', function()
         end
     end
 
-    function Commands.group(user_id, group)
+    ensure_command('group', function(user_id, group)
         vRP.setPermission(user_id, group)
-    end
+    end)
 
-    function Commands.ungroup(user_id, group)
+    ensure_command('ungroup', function(user_id, group)
         vRP.remPermission(user_id, group)
-    end
+    end)
 
-    function Commands.addmoney(user_id, amount)
+    ensure_command('addmoney', function(user_id, amount)
         vRP.addBank(user_id, amount)
-    end
+    end)
 
-    local function generate_plate()
-        local chars = "QWERTYUIOPASDFGHJKLZXCVBNM"
-        local nums = "0123456789"
-        
-        local plate = string.gsub('DDLLLDDD', '[DL]', function(letter)
-            local all = letter == 'D' and nums or chars
-            local index = math.random(#all)
-            return all:sub(index, index)
-        end)
-
-        -- Check if the plate already exists on the database
-        if #SQL('SELECT 1 FROM summerz_vehicles WHERE plate=?', { plate }) > 0 then
-            return generate_plate()
-        end
-
-        return plate
-    end
-
-    function Commands.addvehicle(user_id, vehicle)
+    ensure_command('addvehicle', function(user_id, vehicle)
         local old = SQL('SELECT * FROM summerz_vehicles WHERE user_id=? AND vehicle=?', { user_id, vehicle })
 
         if #old > 0 then
             return _('already.owned.self')
         end
 
-        local data = { user_id = user_id, vehicle = vehicle, plate = generate_plate() }
-        local tax = SQL.firstColumn('summerz_vehicles', 'tax', 'ipva')
-        if tax then
-            data[tax] = os.time()
-        end
+        local data = { user_id = user_id, vehicle = vehicle }
+
+        data.plate = vRP.generate_plate('summerz_vehicles', 'plate')
+        data.tax = os.time()
+        data.ipva = os.time()
 
         SQL.insert('summerz_vehicles', data)
-    end
+    end)
 
-    function Commands.delvehicle(user_id, vehicle)
+    ensure_command('delvehicle', function(user_id, vehicle)
         SQL('DELETE FROM summerz_vehicles WHERE user_id=? AND vehicle=?', { user_id, vehicle })
-    end
+    end)
 
-    function Commands.addhouse(user_id, name)
+    ensure_command('addhouse', function(user_id, name)
         local old = SQL('SELECT * FROM vrp_homes WHERE owner=1 AND home=?', { name })[1]
         
         if old then
@@ -78,21 +64,21 @@ create_extension('vrp/creative4', function()
             owner = 1,
             tax = os.time(),
         })
-    end
+    end)
 
-    function Commands.delhouse(user_id, name)
+    ensure_command('delhouse', function(user_id, name)
         SQL('DELETE FROM vrp_homes WHERE user_id=? AND home=?', { user_id, name })
-    end
+    end)
 
-    function Commands.changephone(user_id, phone)
+    ensure_command('changephone', function(user_id, phone)
         SQL('UPDATE summerz_characters SET phone=? WHERE id=?', { phone, user_id })
-    end
+    end)
 
-    function Commands.addgems(user_id, gems)
+    ensure_command('addgems', function(user_id, gems)
         SQL([[UPDATE summerz_accounts SET gems=gems+?
             WHERE steam=(SELECT steam FROM summerz_characters WHERE id=?)
         ]], { gems, user_id })
-    end
+    end)
 
     function vRP.setBanned(user_id, bool)
         local row = SQL('SELECT steam FROM summerz_characters WHERE id=?', { user_id })[1]
@@ -104,13 +90,16 @@ create_extension('vrp/creative4', function()
         end
     end
 
-    function Commands.whitelist(user_id)
+    ensure_command('whitelist', function(user_id)
         error('Not implemented on creative v4')
-    end
+    end)
 
-    function Commands.reset_character(user_id)
+    ensure_command('reset_character', function(user_id)
         error('Not implemented on creative v4')
-    end
+    end)
+
+    AddEventHandler('playerConnect', Scheduler.batch)
+
     ------------------------------------------------------------------------
     -- Credits API
     ------------------------------------------------------------------------

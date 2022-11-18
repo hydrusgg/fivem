@@ -5,6 +5,15 @@ GlobalState['hydrus:lang'] = 'en'
 
 ENV.debug = false
 ENV.token = 'insert-your-token-here'
+
+-- Be careful when adding more workers, your commands must support concurrency and race condition
+-- By default, the script handles race conditions just fine
+ENV.workers = 4
+
+-- D = Digit (0-9)
+-- L = Letter (A-Z)
+ENV.plate_format = 'DDLLLDDD'
+
 -- Loads the intelisense from the github using load()
 ENV.enhanced_intelisense = true
 ENV.products = {}
@@ -18,7 +27,7 @@ ENV.chat_styles = {
     'border-radius: 5px',
     'color: snow',
     'display: flex',
-    'align-items: center',
+    'align-items:d center',
     'justify-content: center',
     'font-weight: bold',
 }
@@ -59,20 +68,20 @@ AddEventHandler('hydrus:products-ready', function(scope)
     })
     
     -- Custom product
-    -- table.insert(ENV.products, {
-    --     name = 'Change phone number',
-    --     consume = { 'phone_number', 1 },
-    --     image = '',
-    --     form = {
-    --         {
-    --             label = _('insert.phone'),
-    --             placeholder = '000-000',
-    --             name = 'phone',
-    --             pattern = '000-000'
-    --         }
-    --     },
-    --     -- Look at plugins/ext/products.lua for the reference
-    --     is_allowed = phone_is_allowed,
-    --     execute = phone_execute
-    -- })
+    table.insert(ENV.products, {
+        name = 'Change phone number',
+        consume = { 'phone_number', 1 },
+        image = '',
+        form = {
+            {
+                label = _('insert.phone'),
+                placeholder = '000-000',
+                name = 'phone',
+                pattern = '000-000'
+            }
+        },
+        -- Look at server/ext/products.lua for the reference
+        is_allowed = phone_is_allowed,
+        execute = phone_execute
+    })
 end)

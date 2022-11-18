@@ -44,7 +44,7 @@ create_extension('products', function()
     end)
 
     home_execute = callable(function(self, source, form)
-        local user_id = vRP.getUserId(source)
+        local user_id = Proxy.getId(source)
 
         local owned = Commands.addhouse(user_id, form.home)
 
@@ -100,7 +100,7 @@ create_extension('products', function()
     end)
 
     vehicle_execute = callable(function(self, source, form)
-        local user_id = vRP.getUserId(source)
+        local user_id = Proxy.getId(source)
 
         local owned = Commands.addvehicle(user_id, form.vehicle)
 

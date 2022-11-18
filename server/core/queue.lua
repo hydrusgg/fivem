@@ -11,7 +11,7 @@ local function handle_command(id, raw)
 
         local fname = table.remove(args, 1)
         local func = Commands[fname]
-        assert(type(func) == 'function', {'Commands["'..fname..'"] is not a function'})
+        assert(is_callable(func), {'Commands["'..fname..'"] is not a function'})
 
         return func(table.unpack(args))
     end)
@@ -126,6 +126,8 @@ CreateThread(function()
     end
 end)
 
--- You can add more workers, but one is fine
--- Be careful when adding more workers, your commands must support concurrency and race condition
-Queue:work()
+local workers_count = ENV.workers or 1
+
+for i = 1, workers_count do
+    Queue:work()
+end

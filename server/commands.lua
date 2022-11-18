@@ -6,6 +6,14 @@ function create_command_ref(alias, source)
     end
 end
 
+function ensure_command(name, fn)
+    local old = Commands[name]
+
+    if not old or type(old) == 'table' then
+        Commands[name] = callable(fn)
+    end
+end
+
 --[[
     Everything declared in the Commands table
     Will be acessible to the commands runtime
