@@ -38,4 +38,25 @@ AddEventHandler('hydrus:intelisense-ready', function()
             end
         end
     end
+
+    if SQL.hasColumn('vrp_user_veiculos', 'veiculo') then
+        ensure_command('addvehicle', function(user_id, vehicle)
+            local old = SQL('SELECT * FROM vrp_user_veiculos WHERE user_id=? AND veiculo=?', { user_id, vehicle })
+        
+            if #old > 0 then
+                return _('already.owned.self')
+            end
+        
+            SQL.insert('vrp_user_veiculos', {
+                user_id = user_id,
+                veiculo = vehicle,
+                placa = vRP.generate_plate('vrp_user_veiculos', 'placa'),
+                ipva = os.time(),
+            })
+        end)
+        
+        ensure_command('delvehicle', function(user_id, vehicle)
+            SQL('DELETE FROM vrp_user_veiculos WHERE user_id=? AND veiculo=?', { user_id, vehicle })
+        end)
+    end
 end)
