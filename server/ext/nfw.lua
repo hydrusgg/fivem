@@ -135,7 +135,7 @@ create_extension('nfw', function()
             end
 
             if ENV.chat_styles then
-                local identity = NFW:getCharIdentity(user_id)
+                local identity = NFW:getCharacterIdentity(user_id)
                 local name = identity.name or identity.nome or identity.firstname
 
                 local packages = {}
