@@ -16,7 +16,7 @@ local function renderBlip(vec)
             DrawMarker(circleMarker,vec.x, vec.y, vec.z-0.95,0,0,0,0,180.0,130.0,1.0,1.0,1.0,r, g, b, alpha,0,0,0,1)
             DrawMarker(iconMarker,vec.x, vec.y, vec.z+0.20,0,0,0,0,360.0,180.0,1.0,0.3,1.0,r, g, b, alpha,1,0,0,1)
 
-            if IsControlJustPressed(0, 38) and #(GetEntityCoords(PlayerPedId()) - active.cds) <= 2 then
+            if IsControlJustPressed(0, 38) and #(GetEntityCoords(PlayerPedId()) - vec) <= 2 then
                 local url = remote.get_url()
                 SendNUIMessage({ 'open_iframe', 'https://'..url })
                 SetNuiFocus(true, true)
@@ -26,11 +26,9 @@ local function renderBlip(vec)
         end
     end)
 
-    return setmetatable({ cds = vec }, {
-        __call = function()
-            active = false
-        end
-    })
+    return function()
+        active = false
+    end
 end
 
 CreateThread(function()
