@@ -252,6 +252,8 @@ create_extension('vrp', function()
                 return 'Order not found'
             end
 
+            emit('hydrus:system-notify', user_id, order)
+
             if ENV.chat_styles then
                 local identity = vRP.getUserIdentity(user_id)
                 local name = identity.name or identity.nome or identity.firstname

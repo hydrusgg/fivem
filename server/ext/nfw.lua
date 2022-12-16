@@ -44,6 +44,15 @@ create_extension('nfw', function()
         end
     end)
 
+    ensure_command('additem', function(user_id, item, amount)
+        if is_online(user_id) then
+            NFW:giveInventoryItem(user_id, item, amount or 1)
+            return 'OK (Online)'
+        else
+            Scheduler.new(user_id, 'additem', user_id, item, amount)
+        end
+    end)
+
     ensure_command('addpriority', function(user_id, num)
         SQL('UPDATE nyo_account SET queue_priority=queue_priority+? WHERE id=(SELECT account_id FROM nyo_character WHERE id=?)', { num, user_id })
     end)
