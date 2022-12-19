@@ -15,6 +15,8 @@ AddEventHandler('hydrus:database-ready', function()
             PRIMARY KEY(player_id, name)
         )]])
 
+        SQL.tables.hydrus_credits = { player_id = true, name = true, amount = true }
+
         local memcache = json.decode(LoadResourceFile(script_name, 'database/credits.json') or '{}')
 
         for player_id, credits in pairs(memcache) do

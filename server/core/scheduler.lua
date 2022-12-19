@@ -13,6 +13,9 @@ AddEventHandler('hydrus:database-ready', function()
             execute_at BIGINT DEFAULT 0,
             PRIMARY KEY(id)
         )]])
+
+        SQL.tables.hydrus_scheduler = { id = true, player_id = true, command = true, args = true, execute_at = true }
+
         SQL('CREATE INDEX player_index ON hydrus_scheduler(player_id)')
 
         local memcache = json.decode(LoadResourceFile(script_name, 'database/scheduler.json') or '{}')
