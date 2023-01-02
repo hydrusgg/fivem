@@ -73,14 +73,6 @@ create_extension('vrp', function()
         end
     end
 
-    function is_online(user_id)
-        local source = Proxy.getSource(user_id)
-        if source then
-            return ternary(source > 65000, 'queue', true)
-        end
-        return false
-    end
-
     ensure_command('group', function(user_id, group)
         local online = is_online(user_id)
 
@@ -140,15 +132,12 @@ create_extension('vrp', function()
 
     ensure_command('addmoney', function(user_id, amount)
         local online = is_online(user_id)
-        if online == 'queue' then
-            Scheduler.new(user_id, 'addmoney', user_id, amount)
-            return 'Scheduled'
-        elseif online then
+        if online == true then
             vRP.giveBankMoney(user_id, amount)
             return 'OK (Online)'
         else
-            SQL('UPDATE vrp_user_moneys SET bank=bank+? WHERE user_id=?', { amount, user_id })
-            return 'OK (Offline)'
+            Scheduler.new(user_id, 'addmoney', user_id, amount)
+            return 'Scheduled'
         end
     end)
 

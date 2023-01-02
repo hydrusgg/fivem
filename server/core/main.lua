@@ -3,6 +3,14 @@ Hydrus = API('https://api.hydrus.gg/plugin/v1', {
 })
 Store = {}
 
+function is_online(id)
+    local source = Proxy.getSource(id)
+    if source then
+        return ternary(source > 65000, 'queue', true)
+    end
+    return false
+end
+
 CreateThread(function()
     local ws, connected, seq = nil, false, 0
     local pid = math.abs(GetHashKey(GetResourcePath(script_name)))

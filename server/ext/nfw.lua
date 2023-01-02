@@ -9,11 +9,6 @@ create_extension('nfw', function()
         end,
     }
 
-    function is_online(user_id)
-        local source = Proxy.getSource(user_id)
-        return source and source < 65500
-    end
-
     local function get_group_id(name)
         local row = SQL('SELECT * FROM nyo_gm_groups WHERE name=?', { name })[1]
         assert(row, {'Group not found'})
@@ -45,11 +40,12 @@ create_extension('nfw', function()
     end)
 
     ensure_command('additem', function(user_id, item, amount)
-        if is_online(user_id) then
+        if is_online(user_id) == true then
             NFW:giveInventoryItem(user_id, item, amount or 1)
             return 'OK (Online)'
         else
             Scheduler.new(user_id, 'additem', user_id, item, amount)
+            return 'Scheduled'
         end
     end)
 
@@ -66,11 +62,12 @@ create_extension('nfw', function()
     end)
     
     ensure_command('addmoney', function(user_id, amount)
-        if is_online(user_id) then
+        if is_online(user_id) == true then
             NFW:giveBankMoney(user_id, amount)
             return 'OK (Online)'
         else
-            SQL('UPDATE nyo_character SET bank_money=bank_money+? WHERE id=?', { amount, user_id })
+            Scheduler.new(user_id, 'addmoney', user_id, amount)
+            return 'Scheduled'
         end
     end)
     
