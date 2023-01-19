@@ -15,123 +15,134 @@ create_extension('nfw', function()
         return row.id
     end
     
-    ensure_command('group', function(user_id, group)
-        NFW:addUserGroup(user_id, get_group_id(group))
+    ensure_command('group', function(char_id, group)
+        NFW:addUserGroup(char_id, get_group_id(group))
     end)
     
-    ensure_command('ungroup', function(user_id, group)
-        NFW:remUserGroup(user_id, get_group_id(group))
+    ensure_command('ungroup', function(char_id, group)
+        NFW:remUserGroup(char_id, get_group_id(group))
     end)
 
-    ensure_command('addvip', function(user_id, vip, isAccount)
+    ensure_command('addvip', function(char_id, vip, isAccount)
         if isAccount then
-            NFW:addAccountVipByChar(user_id, vip)
+            NFW:addAccountVipByChar(char_id, vip)
         else
-            NFW:addCharacterVip(user_id, vip)
+            NFW:addCharacterVip(char_id, vip)
         end
     end)
     
-    ensure_command('delvip', function(user_id, vip, isAccount)
+    ensure_command('delvip', function(char_id, vip, isAccount)
         if isAccount then
-            NFW:removeAccountVipByChar(user_id, vip)
+            NFW:removeAccountVipByChar(char_id, vip)
         else
-            NFW:removeCharacterVip(user_id, vip)
+            NFW:removeCharacterVip(char_id, vip)
         end
     end)
 
-    ensure_command('additem', function(user_id, item, amount)
-        if is_online(user_id) == true then
-            NFW:giveInventoryItem(user_id, item, amount or 1)
+    ensure_command('additem', function(char_id, item, amount)
+        if is_online(char_id) == true then
+            NFW:giveInventoryItem(char_id, item, amount or 1)
             return 'OK (Online)'
         else
-            Scheduler.new(user_id, 'additem', user_id, item, amount)
+            Scheduler.new(char_id, 'additem', char_id, item, amount)
             return 'Scheduled'
         end
     end)
 
-    ensure_command('addpriority', function(user_id, num)
-        SQL('UPDATE nyo_account SET queue_priority=queue_priority+? WHERE id=(SELECT account_id FROM nyo_character WHERE id=?)', { num, user_id })
+    ensure_command('addpriority', function(char_id, num)
+        SQL('UPDATE nyo_account SET queue_priority=queue_priority+? WHERE id=(SELECT account_id FROM nyo_character WHERE id=?)', { num, char_id })
     end)
 
-    ensure_command('setpriority', function(user_id, num)
-        SQL('UPDATE nyo_account SET queue_priority=? WHERE id=(SELECT account_id FROM nyo_character WHERE id=?)', { num, user_id })
+    ensure_command('setpriority', function(char_id, num)
+        SQL('UPDATE nyo_account SET queue_priority=? WHERE id=(SELECT account_id FROM nyo_character WHERE id=?)', { num, char_id })
     end)
 
-    ensure_command('delpriority', function(user_id, num)
-        SQL('UPDATE nyo_account SET queue_priority=queue_priority-? WHERE id=(SELECT account_id FROM nyo_character WHERE id=?)', { num, user_id })
+    ensure_command('delpriority', function(char_id, num)
+        SQL('UPDATE nyo_account SET queue_priority=queue_priority-? WHERE id=(SELECT account_id FROM nyo_character WHERE id=?)', { num, char_id })
     end)
     
-    ensure_command('addmoney', function(user_id, amount)
-        if is_online(user_id) == true then
-            NFW:giveBankMoney(user_id, amount)
+    ensure_command('addmoney', function(char_id, amount)
+        if is_online(char_id) == true then
+            NFW:giveBankMoney(char_id, amount)
             return 'OK (Online)'
         else
-            Scheduler.new(user_id, 'addmoney', user_id, amount)
+            Scheduler.new(char_id, 'addmoney', char_id, amount)
             return 'Scheduled'
         end
     end)
     
-    ensure_command('addvehicle', function(user_id, vehicle)
-        local old = SQL('SELECT * FROM nyo_users_vehicles WHERE char_id=? AND vehname=?', { user_id, vehicle })
+    ensure_command('addvehicle', function(char_id, vehicle)
+        local old = SQL('SELECT * FROM nyo_users_vehicles WHERE char_id=? AND vehname=?', { char_id, vehicle })
     
         if #old > 0 then
             return _('already.owned.self')
         end
     
         SQL.insert('nyo_users_vehicles', {
-            char_id = user_id,
+            char_id = char_id,
             vehname = vehicle,
             plate = NFW:generatePlate(),
             tax = os.time(),
         })
     end)
     
-    ensure_command('delvehicle', function(user_id, vehicle)
-        SQL('DELETE FROM nyo_users_vehicles WHERE char_id=? AND vehname=?', { user_id, vehicle })
+    ensure_command('delvehicle', function(char_id, vehicle)
+        SQL('DELETE FROM nyo_users_vehicles WHERE char_id=? AND vehname=?', { char_id, vehicle })
     end)
     
-    ensure_command('addhouse', function(user_id, name)
-        error({ 'Not implemented' })
+    ensure_command('addhouse', function(char_id, id)
+        -- error({ 'Not implemented' })
+        SQL.replace('nyo_homes_permission', {
+            homes_id = id,
+            charId = char_id,
+            owner = 1,
+            vault = 1,
+        })
     end)
     
-    ensure_command('delhouse', function(user_id, name)
-        error({ 'Not implemented' })
+    ensure_command('delhouse', function(char_id, id)
+        local row = SQL('SELECT 1 FROM nyo_homes_permission WHERE homes_id=? AND charId=?', { id, char_id })[1]
+
+        if row then
+            SQL('DELETE FROM nyo_homes_permission WHERE homes_id=?', { id })
+            return 'OK (Owner)'
+        end
     end)
     
-    ensure_command('changephone', function(user_id, phone)
-        SQL('UPDATE nyo_character SET phone=? WHERE id=?', { phone, user_id })
+    ensure_command('changephone', function(char_id, phone)
+        SQL('UPDATE nyo_character SET phone=? WHERE id=?', { phone, char_id })
     end)
 
-    local function setBanned(user_id, bool)
-        SQL('UPDATE nyo_account SET banned=? WHERE id=(SELECT account_id FROM nyo_character WHERE id=?)', { bool, user_id })
+    local function setBanned(char_id, bool)
+        SQL('UPDATE nyo_account SET banned=? WHERE id=(SELECT account_id FROM nyo_character WHERE id=?)', { bool, char_id })
     end
 
-    ensure_command('ban', function(user_id)
-        setBanned(user_id, true)
+    ensure_command('ban', function(char_id)
+        setBanned(char_id, true)
 
-        local source = Proxy.getSource(user_id)
+        local source = Proxy.getSource(char_id)
         if source then
             DropPlayer(source)
             return 'OK (Online)'
         end
     end)
 
-    ensure_command('unban', function(user_id)
-        setBanned(user_id, false)
+    ensure_command('unban', function(char_id)
+        setBanned(char_id, false)
     end)
     
-    ensure_command('whitelist', function(user_id)
-        SQL('UPDATE nyo_account SET whitelisted=? WHERE id=(SELECT account_id FROM nyo_character WHERE id=?)', { bool, user_id })
+    ensure_command('whitelist', function(char_id)
+        SQL('UPDATE nyo_account SET whitelisted=? WHERE id=(SELECT account_id FROM nyo_character WHERE id=?)', { bool, char_id })
     end)
 
     Commands['system-notify'] = function(data)
         local payload = json.decode(Base64:decode(data))
 
-        local user_id = payload.user_id
-        local source = Proxy.getSource(user_id)
+        local char_id = payload.user_id
+        local source = Proxy.getSource(char_id)
         if not source then
             -- The player is offline, try again later...
-            Scheduler.new(user_id, 'system-notify', data)
+            Scheduler.new(char_id, 'system-notify', data)
         else
             local status,order = Hydrus('GET', '/orders/'..payload.order_id)
 
@@ -141,7 +152,7 @@ create_extension('nfw', function()
             end
 
             if ENV.chat_styles then
-                local identity = NFW:getCharacterIdentity(user_id)
+                local identity = NFW:getCharacterIdentity(char_id)
                 local name = identity.name or identity.nome or identity.firstname
 
                 local packages = {}
@@ -175,8 +186,8 @@ create_extension('nfw', function()
     ------------------------------------------------------------------------
     
     function home_is_allowed:call(source, form)
-        local row = SQL('SELECT user_id FROM nyo_homes_permission WHERE homes_id=?', { form.home })[1]
-        return not row or string.equals(row.user_id, Proxy.getId(source))
+        local row = SQL('SELECT charId FROM nyo_homes_permission WHERE homes_id=? AND owner=1', { form.home })[1]
+        return not row or string.equals(row.charId, Proxy.getId(source))
     end
     
     function phone_is_allowed:call(source, form)

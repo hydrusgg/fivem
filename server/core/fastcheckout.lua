@@ -31,7 +31,7 @@ exports('createFastCheckout', function(payload, source)
     local integrations = payload.integrations
     if integrations then -- Cast integrations id to objects with id, name and avatarURL
         for platform in each { 'discord', 'steam' } do
-            if type(integrations[platform]) == 'number' then
+            if tonumber(integrations[platform]) then
                 integrations[platform] = {
                     id = integrations[platform],
                     name = _('autofilled'),
