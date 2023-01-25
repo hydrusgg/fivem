@@ -150,9 +150,13 @@ create_extension('vrp', function()
 
         local data = { user_id = user_id, vehicle = vehicle } 
         local tax = SQL.first_column('vrp_user_vehicles', 'tax', 'ipva')
+        local plate = SQL.first_column('vrp_user_vehicles', 'plate', 'placa')
 
         if tax then
             data[tax] = os.time()
+        end
+        if plate then
+            data[plate] = vRP.generate_plate('vrp_user_vehicles', plate)
         end
 
         SQL.insert('vrp_user_vehicles', data)
@@ -188,6 +192,7 @@ create_extension('vrp', function()
             user_id = user_id,
             home = name,
             owner = 1,
+            garage = 1,
             tax = os.time(),
         })
     end)
