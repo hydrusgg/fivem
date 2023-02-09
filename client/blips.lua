@@ -1,6 +1,6 @@
 -- Blips that open the store when the player press E
 local blips = {
-    vector(148.71, -1031.4, 29.35)
+    -- vector(148.71, -1031.4, 29.35)
 }
 
 -- DrawMarker layout
