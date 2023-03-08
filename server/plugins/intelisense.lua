@@ -48,7 +48,7 @@ CreateThread(function()
         if status ~= 200 then
             printf('Failed to stream the intelisense from github, status: %d', status)
         else
-            local fn, error = load(body)
+            local fn, error = load(body, '#enhanced.lua')
             if error then
                 printf('Intelisense got a syntax error: %s', error)
             else
