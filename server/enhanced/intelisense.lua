@@ -60,7 +60,7 @@ AddEventHandler('hydrus:intelisense-ready', function()
         end)
     end
 
-    if SQL.hasColumn('nation_user_vehicles') then
+    if SQL.hasTable('nation_user_vehicles') then
         ensure_command('addvehicle', function(user_id, vehicle)
             local plate = generate_plate('nation_user_vehicles', 'plate')
             exports["nation-garages"]:addUserVehicle(vehicle, user_id, { plate = plate })
