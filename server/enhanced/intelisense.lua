@@ -69,6 +69,7 @@ AddEventHandler('hydrus:intelisense-ready', function()
 
         ensure_command('delvehicle', function(user_id, plate)
             exports["nation-garages"]:deleteUserVehicle(plate)
+            SQL('DELETE FROM nation_user_vehicles WHERE user_id=? AND vehicle=? LIMIT 1', { user_id, plate })
         end)
 
         function vehicle_execute:call(source, form)
