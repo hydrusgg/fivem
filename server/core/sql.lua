@@ -79,7 +79,7 @@ function SQL.silent(sql, params)
     if SQL.driver then
         local p = promise.new()
         SQL.driver(p, sql, params or {})
-        return Citizen.Await(p) or error('Unexpected sql result from '..script)
+        return Citizen.Await(p) or error('Unexpected sql result from db driver')
     end
     error('Missing compatible SQL driver')
 end
