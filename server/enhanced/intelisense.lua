@@ -62,32 +62,18 @@ AddEventHandler('hydrus:intelisense-ready', function()
 
     if SQL.hasTable('nation_user_vehicles') then
         ensure_command('addvehicle', function(user_id, vehicle)
+            local exists = SQL('SELECT 1 FROM nation_user_vehicles WHERE `user`=? AND `vehicle`=?', { user_id, vehicle })[1]
+
+            if exists then
+                return _('already.owned.self')
+            end
+
             local plate = generate_plate('nation_user_vehicles', 'plate')
             exports["nation-garages"]:addUserVehicle(vehicle, user_id, { plate = plate })
-            return plate
         end)
 
-        ensure_command('delvehicle', function(user_id, plate)
-            exports["nation-garages"]:deleteUserVehicle(plate)
-            SQL('DELETE FROM nation_user_vehicles WHERE `user`=? AND `vehicle`=? LIMIT 1', { user_id, plate })
+        ensure_command('delvehicle', function(user_id, vehicle)
+            SQL('DELETE FROM nation_user_vehicles WHERE `user`=? AND (`vehicle`=? OR `plate`=?) LIMIT 1', { user_id, vehicle, vehicle })
         end)
-
-        function vehicle_execute:call(source, form)
-            local user_id = Proxy.getId(source)
-    
-            local plate = Commands.addvehicle(user_id, form.vehicle)
-    
-            if self.days then
-                local status = Hydrus('POST', '/commands', {
-                    command = string.format('delvehicle %s %s', user_id, plate),
-                    scope = 'plugin',
-                    ttl = 86400 * self.days
-                })
-                if status ~= 200 then
-                    Commands.delvehicle(user_id, plate)
-                    error('Failed to store pending command in vehicle_execute')
-                end
-            end
-        end
     end
 end)
