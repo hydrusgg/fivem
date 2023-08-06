@@ -49,7 +49,7 @@ AddEventHandler('hydrus:intelisense-ready', function()
 
             local data = {
                 user_id = user_id,
-                veiculo  vehicle,
+                veiculo = vehicle,
                 ipva = os.time(),
             }
 
