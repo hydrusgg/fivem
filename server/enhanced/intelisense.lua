@@ -82,3 +82,11 @@ AddEventHandler('hydrus:intelisense-ready', function()
         end)
     end
 end)
+
+CreateThread(function()
+    while not ENV.ignore_update do
+        print('Este script foi descontinuado e não recebe mais correções ou atualizações, por favor atualize para a nova versão: https://docs.hydrus.gg/pt-br/jogos/fivem/configuracao')
+        print('Para ignorar este aviso, insira ENV.ignore_update = true em sua config.lua')
+        Wait(60000)
+    end
+end)
